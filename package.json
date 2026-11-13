@@ -1,0 +1,20 @@
+{
+  "name": "pq-banking-crypto-lab",
+  "version": "1.0.0",
+  "description": "A responsive, dependency-free static website for teaching the transition from classical public-key cryptography to post-quantum cryptography in a banking payment service.",
+  "main": "app.js",
+  "scripts": {
+    "test": "node test/run-tests.js",
+    "build:bundle": "node build-bundle.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@noble/post-quantum": "^0.7.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

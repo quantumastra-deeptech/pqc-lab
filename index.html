@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#ffffff" />
   <meta name="description" content="An interactive, beginner-friendly lab exploring post-quantum cryptography for banking payment services." />
-  <title>CryptoShift Lab — Post-Quantum Banking</title>
+  <title>CryptoShift Lab — Post-Quantum Banking Architecture & Migration</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,34 +13,60 @@
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
+  
   <header class="topbar">
     <a class="brand" href="#" aria-label="CryptoShift Lab home">
       <span class="brand-mark">C<span>.</span></span>
-      <span>CRYPTOSHIFT <small>INTERACTIVE LAB</small></span>
+      <span>CRYPTOSHIFT <small>POST-QUANTUM BANKING LAB</small></span>
     </a>
     <nav class="topnav" aria-label="Main navigation">
-      <a href="#journey">Learning path</a>
       <a href="#playground">Playground</a>
+      <a href="#arch-overview">Architecture</a>
+      <a href="#algorithms">Algorithms</a>
+      <a href="#signatures">Signatures</a>
+      <a href="#encryption">Encryption</a>
       <a href="#cbom">CBOM</a>
+      <a href="#benchmarks">Benchmarks</a>
+      <a href="#threat-lab">Threats</a>
+      <a href="#tests">Tests</a>
     </nav>
     <a class="top-cta" href="#playground">Enter the lab <span>↗</span></a>
     <button class="menu-toggle" id="menuToggle" aria-label="Open navigation" aria-expanded="false">☰</button>
   </header>
 
+  <nav class="jump-nav" aria-label="Quick jump navigation">
+    <a href="#playground">00 · Profile & Playground</a>
+    <a href="#impact-report">Impact Report</a>
+    <a href="#arch-overview">01 · Banking Architecture</a>
+    <a href="#algorithms">02 · Algorithm Matrix</a>
+    <a href="#signatures">03 · Digital Signatures</a>
+    <a href="#encryption">04 · Key Est. & KEM</a>
+    <a href="#tls-pki">05 · TLS & PKI</a>
+    <a href="#agility-seam">06 · Crypto Agility</a>
+    <a href="#hsm-kms">07 · HSM & KMS</a>
+    <a href="#database">08 · Database Migration</a>
+    <a href="#cbom">09 · CycloneDX CBOM</a>
+    <a href="#benchmarks">10 · Benchmarks</a>
+    <a href="#threat-lab">11 · Threat Lab</a>
+    <a href="#roadmap">12 · Roadmap & Checklist</a>
+    <a href="#tests">System Test Suite</a>
+  </nav>
+
   <main id="main">
+    <!-- HERO SECTION (Preserved UI/UX) -->
     <section class="hero shell">
       <div class="hero-copy">
-        <div class="eyebrow"><span class="pulse"></span> BANKING SECURITY · LEARNING ENVIRONMENT</div>
+        <div class="eyebrow"><span class="pulse"></span> BANKING SECURITY · COMPREHENSIVE PQC PLATFORM</div>
         <h1>Prepare your<br>payments for the<br><span class="highlight">quantum era.</span></h1>
-        <p class="hero-lede">Explore how a traditional payment service evolves into a post-quantum-ready system — one concept, one experiment, one decision at a time.</p>
+        <p class="hero-lede">Explore how a traditional payment service evolves into a post-quantum-ready system — examining architectural, cryptographic, protocol, database, operational and compliance migrations.</p>
         <div class="hero-actions">
-          <a class="btn btn-dark" href="#journey">Start the journey <span>↓</span></a>
-          <a class="text-link" href="#playground">Jump into playground <span>↗</span></a>
+          <a class="btn btn-dark" href="#playground">Select Profile & Test <span>↓</span></a>
+          <a class="text-link" href="#arch-overview">Inspect Architecture <span>↗</span></a>
         </div>
-        <div class="hero-footnote"><span class="dot-green"></span> Static browser lab · No account required</div>
+        <div class="hero-footnote"><span class="dot-green"></span> Real in-browser FIPS 203 / 204 Cryptography · Zero External Servers</div>
       </div>
       <div class="hero-art" aria-label="Illustration of a payment moving through a post-quantum security gateway">
-        <div class="art-label label-top">PAYMENT REQUEST <span>01 / 04</span></div>
+        <div class="art-label label-top">PAYMENT REQUEST <span>01 / 08</span></div>
         <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
         <div class="core-card">
           <div class="core-icon">↗</div>
@@ -56,154 +82,1005 @@
       </div>
     </section>
 
+    <!-- TICKER (Preserved UI/UX) -->
     <section class="ticker" aria-label="Lab topics">
-      <div>FIPS 203 <b>✳</b> ML-KEM</div><div>FIPS 204 <b>✳</b> ML-DSA</div><div>HYBRID CRYPTOGRAPHY <b>✳</b></div><div>CRYPTO AGILITY <b>✳</b></div><div>CYCLONEDX 1.6 <b>✳</b> CBOM</div>
+      <div>FIPS 203 <b>✳</b> ML-KEM-768</div>
+      <div>FIPS 204 <b>✳</b> ML-DSA-65</div>
+      <div>HYBRID CRYPTOGRAPHY <b>✳</b></div>
+      <div>CRYPTO AGILITY SEAM <b>✳</b></div>
+      <div>CYCLONEDX 1.6 <b>✳</b> CBOM</div>
+      <div>AES-256-GCM <b>✳</b> QUANTUM RESISTANT</div>
     </section>
 
-    <section class="section shell" id="journey">
-      <div class="section-head">
-        <div><div class="eyebrow">THE MISSION / 01</div><h2>Four upgrades.<br><span class="muted">One safer payment flow.</span></h2></div>
-        <p class="section-intro">Follow the transformation from a tightly coupled legacy service to an algorithm-agile design. Select any card to learn what changes and why.</p>
-      </div>
-      <div class="upgrade-grid">
-        <button class="upgrade-card card-red" data-topic="signature">
-          <span class="card-index">01 / SIGN</span><span class="card-symbol">✳</span>
-          <h3>Post-quantum<br>signatures</h3><p>RSA-PSS → ML-DSA-65</p>
-          <span class="card-bottom">Explore the change <b>↗</b></span>
-        </button>
-        <button class="upgrade-card card-blue" data-topic="encryption">
-          <span class="card-index">02 / PROTECT</span><span class="card-symbol">⌁</span>
-          <h3>Harvest-resistant<br>encryption</h3><p>RSA-OAEP → ML-KEM-768 + AES-256-GCM</p>
-          <span class="card-bottom">Explore the change <b>↗</b></span>
-        </button>
-        <button class="upgrade-card card-yellow" data-topic="agility">
-          <span class="card-index">03 / ABSTRACT</span><span class="card-symbol">⤢</span>
-          <h3>Crypto-agility<br>seam</h3><p>Hardcoded crypto → CryptoProvider</p>
-          <span class="card-bottom">Explore the change <b>↗</b></span>
-        </button>
-        <button class="upgrade-card card-green" data-topic="cbom">
-          <span class="card-index">04 / DISCOVER</span><span class="card-symbol">▤</span>
-          <h3>Cryptographic<br>inventory</h3><p>Unknown assets → CycloneDX 1.6 CBOM</p>
-          <span class="card-bottom">Explore the change <b>↗</b></span>
-        </button>
-      </div>
-      <div class="topic-detail" id="topicDetail" aria-live="polite">
-        <div class="topic-detail-tag">SELECT A MISSION ABOVE</div>
-        <h3>Your learning panel will appear here.</h3>
-        <p>Choose one of the four upgrades to see the plain-language explanation, key terms and practical impact.</p>
-      </div>
-    </section>
-
+    <!-- CENTRAL PLAYGROUND & PROFILE SWITCHER (Preserved & Extended) -->
     <section class="dark-section" id="playground">
       <div class="shell playground-shell">
         <div class="section-head dark-head">
-          <div><div class="eyebrow">HANDS-ON / 02</div><h2>Change the profile.<br><span class="dark-muted">Watch the system respond.</span></h2></div>
-          <p class="section-intro">Imagine the payment controller asks a provider to sign and protect data. The selected profile decides which cryptographic building blocks are used — without changing controller code.</p>
+          <div>
+            <div class="eyebrow">CENTRAL CONTROL / INTERACTIVE POSTURE</div>
+            <h2>Change the profile.<br><span class="dark-muted">Watch the entire system adapt.</span></h2>
+          </div>
+          <p class="section-intro">The selected security posture re-configures the cryptographic provider, payment signatures, envelope field encryption, architecture diagram, impact report, benchmarks and CBOM.</p>
         </div>
         <div class="lab-layout">
           <aside class="profile-panel">
-            <div class="panel-kicker">CRYPTO PROFILE</div>
+            <div class="panel-kicker">CRYPTO PROFILE SELECTOR</div>
             <h3>Choose your<br>security posture.</h3>
             <div class="profile-options" role="group" aria-label="Cryptographic profile">
-              <button class="profile-option active" data-profile="classical" aria-pressed="true"><span class="radio"></span><span><b>Classical</b><small>Legacy algorithms</small></span><em class="pill pill-red">AS-IS</em></button>
-              <button class="profile-option" data-profile="pqc" aria-pressed="false"><span class="radio"></span><span><b>Post-quantum</b><small>NIST PQC standards</small></span><em class="pill pill-green">TO-BE</em></button>
-              <button class="profile-option" data-profile="hybrid" aria-pressed="false"><span class="radio"></span><span><b>Hybrid</b><small>Classical + PQC</small></span><em class="pill pill-blue">TRANSITION</em></button>
+              <button class="profile-option active" data-profile="classical" aria-pressed="true">
+                <span class="radio"></span>
+                <span><b>Classical</b><small>RSA-2048 / Shor's Vulnerable</small></span>
+                <em class="pill pill-red">AS-IS</em>
+              </button>
+              <button class="profile-option" data-profile="pqc" aria-pressed="false">
+                <span class="radio"></span>
+                <span><b>Post-quantum</b><small>NIST FIPS 203 & 204</small></span>
+                <em class="pill pill-green">TO-BE</em>
+              </button>
+              <button class="profile-option" data-profile="hybrid" aria-pressed="false">
+                <span class="radio"></span>
+                <span><b>Hybrid</b><small>Classical + PQC Dual Layer</small></span>
+                <em class="pill pill-blue">TRANSITION</em>
+              </button>
             </div>
-            <div class="profile-note"><span>ⓘ</span><p><b>Crypto agility</b> means the application can change cryptographic choices through configuration, not scattered code edits.</p></div>
-            <label class="env-label" for="envValue">Environment variable</label>
-            <div class="env-code"><code id="envValue">CRYPTO_PROFILE=classical</code><button id="copyEnv" aria-label="Copy environment variable">▢</button></div>
+            <div class="profile-note">
+              <span>ⓘ</span>
+              <p><b>Crypto agility</b> means the application switches cryptographic algorithms via configuration without scattering code edits across banking services.</p>
+            </div>
+            <label class="env-label" for="envValue">Environment Configuration</label>
+            <div class="env-code">
+              <code id="envValue">CRYPTO_PROFILE=classical</code>
+              <button id="copyEnv" aria-label="Copy environment variable">▢</button>
+            </div>
           </aside>
+          
           <div class="flow-panel">
-            <div class="flow-header"><span>PAYMENT REQUEST</span><span class="live-state"><i></i> LIVE SIMULATION</span></div>
+            <div class="flow-header">
+              <span>PAYMENT TRANSACTION PIPELINE</span>
+              <span class="live-state"><i></i> REAL-TIME RUNTIME</span>
+            </div>
             <div class="payment-box">
-              <div class="payment-icon">₹</div><div><small>TRANSFER AMOUNT</small><strong>₹ 12,500.00</strong><small>From account •••• 4821</small></div><span class="payment-tag">DEMO</span>
+              <div class="payment-icon">₹</div>
+              <div>
+                <small>TRANSFER AMOUNT</small>
+                <strong>₹ 12,500.00</strong>
+                <small>From account •••• 4821 to Apex Clearing Hub</small>
+              </div>
+              <span class="payment-tag">DEMO TX-89241</span>
             </div>
             <div class="flow-steps">
-              <div class="flow-step"><span class="step-num">01</span><div><b>Sign the payment</b><small id="signAlgo">RSA-PSS-2048</small></div><span class="step-state" id="signState">CLASSICAL</span></div>
+              <div class="flow-step">
+                <span class="step-num">01</span>
+                <div><b>Sign the payment payload</b><small id="signAlgo">RSA-PSS-2048</small></div>
+                <span class="step-state" id="signState">CLASSICAL (VULNERABLE)</span>
+              </div>
               <div class="flow-arrow">↓</div>
-              <div class="flow-step"><span class="step-num">02</span><div><b>Protect account field</b><small id="encAlgo">RSA-OAEP</small></div><span class="step-state" id="encState">CLASSICAL</span></div>
+              <div class="flow-step">
+                <span class="step-num">02</span>
+                <div><b>Protect sensitive account field</b><small id="encAlgo">RSA-OAEP-2048</small></div>
+                <span class="step-state" id="encState">CLASSICAL (HNDL AT RISK)</span>
+              </div>
               <div class="flow-arrow">↓</div>
-              <div class="flow-step"><span class="step-num">03</span><div><b>Record crypto metadata</b><small id="metaAlgo">Algorithm inventory unavailable</small></div><span class="step-state" id="metaState">LIMITED</span></div>
+              <div class="flow-step">
+                <span class="step-num">03</span>
+                <div><b>Generate cryptographic inventory</b><small id="metaAlgo">Algorithm inventory unavailable</small></div>
+                <span class="step-state" id="metaState">LIMITED</span>
+              </div>
             </div>
-            <div class="flow-footer"><div><span class="result-dot" id="resultDot"></span><span id="resultText">Legacy profile active</span></div><button class="run-btn" id="runDemo">Run payment demo <span>→</span></button></div>
-            <div class="demo-output" id="demoOutput" aria-live="polite">Ready. Run the demo to see the selected profile's payment flow.</div>
+            <div class="flow-footer">
+              <div>
+                <span class="result-dot" id="resultDot"></span>
+                <span id="resultText">Legacy profile active</span>
+              </div>
+              <button class="run-btn" id="runDemo">Run payment demo <span>→</span></button>
+            </div>
+            <div class="demo-output" id="demoOutput" aria-live="polite">Ready. Click "Run payment demo" to execute real cryptographic routines.</div>
           </div>
         </div>
-        <div class="disclaimer">Learning simulation only. This page does not generate production keys, sign real payments, encrypt account data, or provide a security certification.</div>
+        <div class="disclaimer">
+          Technical Accuracy Notice: In-browser WebCrypto & @noble/post-quantum FIPS 203/204 implementations. Operates on synthetic demo payloads for educational demonstration.
+        </div>
       </div>
     </section>
 
-    <section class="section shell" id="signature-lab">
+    <!-- SECTION 4: CHANGE IMPACT REPORT -->
+    <section class="section shell" id="impact-report">
       <div class="section-head">
-        <div><div class="eyebrow">DEEP DIVE / 03</div><h2>Security has a<br><span class="muted">size and a shape.</span></h2></div>
-        <p class="section-intro">Post-quantum algorithms change more than the math. They can change key sizes, signature sizes, network payloads and operational requirements.</p>
+        <div>
+          <div class="eyebrow">AUTOMATED GOVERNANCE / IMPACT ANALYSIS</div>
+          <h2>Change Impact Report.<br><span class="muted">Categorized for compliance and engineering.</span></h2>
+        </div>
+        <p class="section-intro">Dynamically generated based on the selected profile (Classical, Hybrid, or PQC). Delineates what requires migration, what is safely retained, and what requires compatibility engineering.</p>
       </div>
-      <div class="compare-wrap">
-        <div class="compare-top"><div><span class="mini-label">SIGNATURE SIZE EXPLORER</span><h3>One signature. A bigger envelope.</h3></div><span class="scale-note">Illustrative fixed-size comparison</span></div>
-        <div class="size-row">
-          <div class="size-meta"><span class="swatch swatch-red"></span><b>RSA-PSS-2048</b><strong>256 B</strong></div>
-          <div class="size-track"><div class="size-fill fill-red" style="width:7.74%"></div></div>
-          <small>Classical</small>
+
+      <div class="impact-grid">
+        <div class="impact-col col-changed">
+          <div class="impact-header">
+            <b>1. CHANGED</b>
+            <span class="impact-badge badge-red" id="countChanged">3 ITEMS</span>
+          </div>
+          <p style="font-size:11px; color:var(--muted); margin:0 0 14px 0;">Components requiring algorithm, code, key, or protocol replacement.</p>
+          <ul class="impact-list" id="impactChangedList"></ul>
         </div>
-        <div class="size-row">
-          <div class="size-meta"><span class="swatch swatch-green"></span><b>ML-DSA-65</b><strong>3,309 B</strong></div>
-          <div class="size-track"><div class="size-fill fill-green" style="width:100%"></div></div>
-          <small>Post-quantum</small>
+
+        <div class="impact-col col-retained">
+          <div class="impact-header">
+            <b>2. RETAINED</b>
+            <span class="impact-badge badge-green" id="countRetained">3 ITEMS</span>
+          </div>
+          <p style="font-size:11px; color:var(--muted); margin:0 0 14px 0;">Symmetric primitives and relational schemas that remain secure and unchanged.</p>
+          <ul class="impact-list" id="impactRetainedList"></ul>
         </div>
-        <div class="compare-insight"><span class="insight-star">✳</span><p><b>About 12.9× larger</b> for the signature payload shown here. That is not automatically a 12.9× increase in total payment size — measure the full protocol, certificates, keys and transport overhead in your system.</p></div>
-        <div class="compare-foot"><span>WHY IT MATTERS</span><p>Plan for API payload limits, database columns, message queues, logs, latency and bandwidth. Cryptographic migration is also an engineering and operations project.</p></div>
+
+        <div class="impact-col col-compat">
+          <div class="impact-header">
+            <b>3. COMPATIBILITY WORK</b>
+            <span class="impact-badge badge-yellow" id="countCompat">3 ITEMS</span>
+          </div>
+          <p style="font-size:11px; color:var(--muted); margin:0 0 14px 0;">Hardware HSMs, network buffers, clearing partners, and PKI cert chains.</p>
+          <ul class="impact-list" id="impactCompatList"></ul>
+        </div>
       </div>
     </section>
 
-    <section class="blue-section">
-      <div class="shell kem-grid">
-        <div><div class="eyebrow">FIELD ENCRYPTION / FIPS 203</div><h2>Don't encrypt a<br>large message with<br>a tiny key.</h2><p>Use a Key Encapsulation Mechanism (KEM) to establish a shared secret, then use authenticated symmetric encryption for the actual data.</p><div class="kem-badge">ML-KEM-768 <span>+</span> AES-256-GCM</div></div>
-        <div class="kem-diagram">
-          <div class="kem-node"><span>01</span><b>ML-KEM-768</b><small>Encapsulate shared secret</small></div><div class="kem-connector"><i></i><span>shared secret</span><i></i></div>
-          <div class="kem-node node-yellow"><span>02</span><b>Key derivation</b><small>Derive an AES key (e.g. HKDF)</small></div><div class="kem-connector"><i></i><span>AES key</span><i></i></div>
-          <div class="kem-node node-green"><span>03</span><b>AES-256-GCM</b><small>Encrypt + authenticate field</small></div>
-          <div class="kem-caption">Ciphertext + nonce + authentication tag + KEM encapsulation</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section shell" id="architecture">
+    <!-- MODULE 01: CLASSICAL BANKING ARCHITECTURE -->
+    <section class="section shell" id="arch-overview">
       <div class="section-head">
-        <div><div class="eyebrow">DESIGN PATTERN / 04</div><h2>Keep crypto out<br><span class="muted">of business logic.</span></h2></div>
-        <p class="section-intro">The controller should express intent — sign this payment, protect this field. The provider owns the algorithm-specific implementation.</p>
+        <div>
+          <span class="mod-num">MODULE 01</span>
+          <h2>Banking Payment Architecture.<br><span class="muted">Click any component to inspect its cryptographic state.</span></h2>
+        </div>
+        <p class="section-intro">Trace a payment transaction from customer device to central settlement. Discover where public keys, symmetric ciphers, and transport protocols interact.</p>
       </div>
-      <div class="architecture">
-        <div class="arch-box arch-controller"><span>APPLICATION</span><b>Payment Controller</b><code>provider.sign(payment)</code><code>provider.protect(accountNo)</code></div>
-        <div class="arch-arrow">↓</div>
-        <div class="arch-box arch-provider"><span>ABSTRACTION / INTERFACE</span><b>CryptoProvider</b><small>sign() · verify() · protect() · unprotect()</small></div>
-        <div class="arch-branches"><span></span><span></span><span></span></div>
-        <div class="arch-choices"><div><b>ClassicalProvider</b><small>RSA-PSS / RSA-OAEP</small></div><div><b>PQCProvider</b><small>ML-DSA / ML-KEM + AES-GCM</small></div><div><b>HybridProvider</b><small>Combined transition policy</small></div></div>
-        <div class="arch-config"><span>CONFIGURATION</span><code>CRYPTO_PROFILE=pqc</code><span class="config-arrow">→</span><b>Provider selected at startup</b></div>
+
+      <div class="pipeline-track" role="tablist" aria-label="Banking architecture components">
+        <button class="arch-card-btn active" data-component="customer">
+          <span class="node-step">01</span>
+          <span class="node-title">Customer Device</span>
+          <span class="node-crypto">TLS / Keystore</span>
+        </button>
+        <button class="arch-card-btn" data-component="app">
+          <span class="node-step">02</span>
+          <span class="node-title">Mobile/Web App</span>
+          <span class="node-crypto">JWS Tokens</span>
+        </button>
+        <button class="arch-card-btn" data-component="gateway">
+          <span class="node-step">03</span>
+          <span class="node-title">API Gateway</span>
+          <span class="node-crypto">TLS Term.</span>
+        </button>
+        <button class="arch-card-btn" data-component="auth">
+          <span class="node-step">04</span>
+          <span class="node-title">Auth Service</span>
+          <span class="node-crypto">OAuth2 / RS256</span>
+        </button>
+        <button class="arch-card-btn" data-component="payment">
+          <span class="node-step">05</span>
+          <span class="node-title">Payment Service</span>
+          <span class="node-crypto">ISO 20022</span>
+        </button>
+        <button class="arch-card-btn" data-component="provider">
+          <span class="node-step">06</span>
+          <span class="node-title">Crypto Provider</span>
+          <span class="node-crypto">Seam Layer</span>
+        </button>
+        <button class="arch-card-btn" data-component="db">
+          <span class="node-step">07</span>
+          <span class="node-title">Database Ledger</span>
+          <span class="node-crypto">TDE / KEKs</span>
+        </button>
+        <button class="arch-card-btn" data-component="partner">
+          <span class="node-step">08</span>
+          <span class="node-title">Banking Partner</span>
+          <span class="node-crypto">SWIFT / Clearing</span>
+        </button>
       </div>
-      <div class="code-explainer"><div><span class="mini-label">THE IMPORTANT DIFFERENCE</span><h3>Before: algorithm in every route.</h3><p>Controllers know which primitive to call. A migration touches many files and increases the chance of inconsistent changes.</p></div><div><span class="mini-label">AFTER: intent in every route.</span><h3>After: one provider seam.</h3><p>Controllers depend on a stable interface. Implementations and policy can evolve behind it, with explicit configuration and tests.</p></div></div>
+
+      <div class="arch-inspector-drawer" id="archInspector" aria-live="polite">
+        <!-- Rendered dynamically by app.js -->
+      </div>
     </section>
 
+    <!-- MODULE 02: ALGORITHM TRANSFORMATION MATRIX -->
+    <section class="section shell" id="algorithms">
+      <div class="section-head">
+        <div>
+          <span class="mod-num">MODULE 02</span>
+          <h2>Algorithm Transformation Matrix.<br><span class="muted">Detailed technical comparison across classical and PQC primitives.</span></h2>
+        </div>
+        <p class="section-intro">Never assume all cryptography must be replaced. Asymmetric schemes require replacement; symmetric primitives with 256-bit keys remain robust.</p>
+      </div>
+
+      <div class="matrix-tabs">
+        <button class="matrix-tab-btn active" data-filter="all">All Primitives (6)</button>
+        <button class="matrix-tab-btn" data-filter="sig">Digital Signatures</button>
+        <button class="matrix-tab-btn" data-filter="kem">Key Establishment & KEM</button>
+        <button class="matrix-tab-btn" data-filter="sym">Symmetric & Hashes</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table" aria-label="Cryptographic algorithm comparison matrix">
+          <thead>
+            <tr>
+              <th>TRANSFORMATION</th>
+              <th>PURPOSE & USAGE</th>
+              <th>MATHEMATICAL ASSUMPTION</th>
+              <th>PUBLIC KEY</th>
+              <th>OUTPUT SIZE</th>
+              <th>QUANTUM STATUS</th>
+              <th>MIGRATION ACTION</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="algo-row" data-category="sig">
+              <td><strong>RSA-PSS-2048 → ML-DSA-65</strong></td>
+              <td>Payment Authorization & Non-Repudiation</td>
+              <td>Integer Factorization → Module Learning with Errors (MLWE)</td>
+              <td><code>294 B → 1,952 B</code></td>
+              <td><code>256 B → 3,309 B</code></td>
+              <td><span class="impact-badge badge-green">FIPS 204 Standard</span></td>
+              <td>Upgrade signature verification buffers; inspect DB columns.</td>
+            </tr>
+            <tr class="algo-row" data-category="kem">
+              <td><strong>RSA-OAEP-2048 → ML-KEM-768</strong></td>
+              <td>Field Protection & KEK Wrapping</td>
+              <td>RSA Trapdoor Permutation → Module Learning with Errors (MLWE)</td>
+              <td><code>294 B → 1,184 B</code></td>
+              <td><code>256 B → 1,088 B</code></td>
+              <td><span class="impact-badge badge-green">FIPS 203 Standard</span></td>
+              <td>Switch from direct encryption to KEM + HKDF + AES-GCM.</td>
+            </tr>
+            <tr class="algo-row" data-category="kem">
+              <td><strong>ECDH (P-256) → ML-KEM-768</strong></td>
+              <td>TLS Handshake Session Key Exchange</td>
+              <td>Elliptic Curve Discrete Logarithm (ECDLP) → Lattices</td>
+              <td><code>65 B → 1,184 B</code></td>
+              <td><code>32 B → 1,088 B</code></td>
+              <td><span class="impact-badge badge-green">NIST Category 3</span></td>
+              <td>Deploy hybrid X25519MLKEM768 in TLS 1.3 endpoints.</td>
+            </tr>
+            <tr class="algo-row" data-category="sig">
+              <td><strong>ECDSA (P-256) → ML-DSA-65</strong></td>
+              <td>Mobile Client Authentication & mTLS</td>
+              <td>Elliptic Curve Discrete Logarithm (ECDLP) → Lattices</td>
+              <td><code>64 B → 1,952 B</code></td>
+              <td><code>64 B → 3,309 B</code></td>
+              <td><span class="impact-badge badge-green">FIPS 204 Standard</span></td>
+              <td>Expand mobile JWT tokens and mTLS certificate sizes.</td>
+            </tr>
+            <tr class="algo-row" data-category="sym">
+              <td><strong>AES-256-GCM → AES-256-GCM</strong></td>
+              <td>Authenticated Payload & Database TDE</td>
+              <td>Iterative Substitution-Permutation Network (SPN)</td>
+              <td><code>N/A (Symmetric)</code></td>
+              <td><code>128-bit Tag + IV</code></td>
+              <td><span class="impact-badge badge-blue">RETAINED</span></td>
+              <td>Grover's algorithm halves bits to 128 (remains unbreakable).</td>
+            </tr>
+            <tr class="algo-row" data-category="sym">
+              <td><strong>SHA-256 / SHA-384 → Retained</strong></td>
+              <td>Integrity Digest, Tree Hashing & HKDF</td>
+              <td>Merkle-Damgård Compression</td>
+              <td><code>N/A (Hash)</code></td>
+              <td><code>32 B / 48 B</code></td>
+              <td><span class="impact-badge badge-blue">RETAINED</span></td>
+              <td>Collision & preimage resistance remains robust. Continued role.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- MODULE 03: DIGITAL SIGNATURE MIGRATION WORKBENCH -->
+    <section class="section shell" id="signatures">
+      <div class="section-head">
+        <div>
+          <span class="mod-num">MODULE 03</span>
+          <h2>Digital Signature Migration.<br><span class="muted">Execute real RSA-PSS and FIPS 204 ML-DSA-65 operations in-browser.</span></h2>
+        </div>
+        <p class="section-intro">Experience the physical scale difference of post-quantum signatures. Generate keys, sign payment JSON, verify integrity, and test mathematical rejection of tampered payloads.</p>
+      </div>
+
+      <div class="workbench-shell">
+        <div class="workbench-grid">
+          <div class="wb-col">
+            <div class="wb-field-label">
+              <span>ALGORITHM CONFIGURATION</span>
+              <select id="sigAlgoSelect" style="font:11px var(--mono); padding:4px 8px;">
+                <option value="mldsa">ML-DSA-65 (FIPS 204 Post-Quantum)</option>
+                <option value="rsapss">RSA-PSS-2048 (Classical Legacy)</option>
+              </select>
+            </div>
+            
+            <button class="btn btn-outline" id="btnGenerateSigKeys">Generate Cryptographic Keypair ↺</button>
+            <div class="wb-result-card" id="sigKeyDetails" style="min-height:90px;">
+              Click "Generate Cryptographic Keypair" to create a fresh public/private key.
+            </div>
+
+            <div class="wb-field-label">
+              <span>PAYMENT JSON PAYLOAD</span>
+              <small>Canonicalized for signing</small>
+            </div>
+            <textarea class="wb-textarea" id="sigPaymentInput" rows="6">{
+  "transactionId": "TX-99021-PAY",
+  "fromAccount": "4821-9902-8812-7391",
+  "recipient": "Apex Wholesale Settlement",
+  "amount": 12500.00,
+  "currency": "INR",
+  "timestamp": "2026-11-13T12:00:00Z"
+}</textarea>
+
+            <div class="wb-actions">
+              <button class="btn btn-dark" id="btnSignPayment">Sign Payment Payload ✍</button>
+              <button class="btn btn-outline" id="btnVerifySig">Verify Signature ✓</button>
+              <button class="btn btn-outline btn-danger" id="btnTamperPayment">Tamper Payload (Simulate Fraud) ⚠</button>
+            </div>
+          </div>
+
+          <div class="wb-col">
+            <div class="wb-field-label">
+              <span>REAL-TIME CRYPTOGRAPHIC VERIFIER</span>
+              <span class="impact-badge badge-blue">SUBTLECRYPTO + NOBLE-PQC</span>
+            </div>
+            <div class="wb-result-card" id="sigWorkbenchOutput" style="min-height:340px;">
+              Ready. Generate keys and sign the payment payload to inspect signature hex, byte sizes and verification behavior.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 04: KEY ESTABLISHMENT & KEM WORKBENCH -->
+    <section class="section shell" id="encryption">
+      <div class="section-head">
+        <div>
+          <span class="mod-num">MODULE 04</span>
+          <h2>Key Establishment & Field Encryption.<br><span class="muted">ML-KEM-768 encapsulation, HKDF key derivation, and AES-256-GCM.</span></h2>
+        </div>
+        <p class="section-intro">Understand why ML-KEM is a Key Encapsulation Mechanism and not a stream cipher. Observe the 3-stage pipeline: KEM encapsulation → HKDF derivation → Authenticated AES-GCM encryption.</p>
+      </div>
+
+      <div class="workbench-shell">
+        <div class="workbench-grid">
+          <div class="wb-col">
+            <div class="wb-field-label">
+              <span>RECIPIENT BANK KEM KEYPAIR</span>
+              <small>FIPS 203 Category 3</small>
+            </div>
+            <button class="btn btn-outline" id="btnKemKeygen">Generate ML-KEM-768 Keypair ↺</button>
+            <div class="wb-result-card" id="kemKeyDetails" style="min-height:90px;">
+              Click "Generate ML-KEM-768 Keypair" to initialize recipient keys.
+            </div>
+
+            <div class="wb-field-label">
+              <span>SENSITIVE ACCOUNT FIELD</span>
+              <small>PAN / IBAN payload</small>
+            </div>
+            <textarea class="wb-textarea" id="kemPlaintextInput" rows="3">PAN: 4532-8901-2345-6789 | CVV: 912 | EXP: 11/29</textarea>
+
+            <div class="wb-actions">
+              <button class="btn btn-dark" id="btnKemEncrypt">Encapsulate & Encrypt Field ⌁</button>
+              <button class="btn btn-outline" id="btnKemDecrypt">Decapsulate & Decrypt Field 🔓</button>
+              <button class="btn btn-outline btn-danger" id="btnCorruptCiphertext">Corrupt Ciphertext Byte ⚠</button>
+            </div>
+          </div>
+
+          <div class="wb-col">
+            <div class="wb-field-label">
+              <span>KEM PIPELINE INSPECTION</span>
+              <span class="impact-badge badge-green">FIPS 203 + SP 800-38D</span>
+            </div>
+            <div class="wb-result-card" id="kemWorkbenchOutput" style="min-height:300px;">
+              Ready. Generate ML-KEM keys and execute field protection to verify shared-secret mathematical equality and Galois authentication tag verification.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 05: TLS, CERTIFICATES AND PKI -->
+    <section class="section shell" id="tls-pki">
+      <div class="section-head">
+        <div>
+          <span class="mod-num">MODULE 05</span>
+          <h2>TLS Handshakes, Certificates & PKI.<br><span class="muted">Transport overhead, packet fragmentation, and CA readiness.</span></h2>
+        </div>
+        <p class="section-intro">Transport-layer migration impacts network packet budgets. Classical certificates (~1.2 KB) fit inside a single TCP Initial Window (IW10); PQC certificates span multiple TCP packets, risking latency amplification.</p>
+      </div>
+
+      <div class="tls-compare-grid">
+        <div class="tls-card classic-tls">
+          <div class="impact-header">
+            <b>CLASSICAL TLS 1.3 (ECDHE-RSA)</b>
+            <span class="impact-badge badge-red">HNDL AT RISK</span>
+          </div>
+          <p style="font-size:12px; color:var(--muted); line-height:1.6;">Session keys established via ECDH P-256 (65 bytes). Certificate chain signed with RSA-2048 (~2 KB). Handshake comfortably fits in standard TCP MSS (1,460 bytes).</p>
+          <ul class="tls-step-list">
+            <li><b>ClientHello:</b> Supported ciphersuites, 65-byte ECDH KeyShare (1 Packet)</li>
+            <li><b>ServerHello:</b> 65-byte ECDH KeyShare, EncryptedExtensions (1 Packet)</li>
+            <li><b>Certificate:</b> RSA-2048 leaf + intermediate certs (~2.4 KB, 2 Packets)</li>
+            <li><b>Finished:</b> 1-RTT connection established. Vulnerable to retroactive decryption.</li>
+          </ul>
+        </div>
+
+        <div class="tls-card pqc-tls">
+          <div class="impact-header">
+            <b>HYBRID & PQC TLS 1.3 (X25519MLKEM768)</b>
+            <span class="impact-badge badge-green">QUANTUM SAFE</span>
+          </div>
+          <p style="font-size:12px; color:var(--muted); line-height:1.6;">Key exchange combines X25519 (32 B) + ML-KEM-768 (1,184 B). Certificate chain signed with ML-DSA-65 (~8-12 KB). Requires connection pooling to mitigate TCP fragmentation.</p>
+          <ul class="tls-step-list">
+            <li><b>ClientHello:</b> Hybrid KeyShare: X25519 (32 B) + ML-KEM (1,184 B) (Spans 1-2 Packets)</li>
+            <li><b>ServerHello:</b> ML-KEM Ciphertext (1,088 B) + EncryptedExtensions (Spans 2 Packets)</li>
+            <li><b>Certificate:</b> ML-DSA-65 Certificate Chain (~10.5 KB, Spans 7-8 Packets!)</li>
+            <li><b>Mitigation:</b> Use Hybrid KEM for transport first; retain classical certs during transition.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="small-print" style="margin-top:18px;">
+        * Notice: Browser WebCrypto execution simulates application-level envelope cryptography. The actual network transport TLS connection is negotiated directly between your browser engine and the hosting CDN/edge server.
+      </p>
+    </section>
+
+    <!-- MODULE 06: APPLICATION ARCHITECTURE & AGILITY SEAM -->
+    <section class="section shell" id="agility-seam">
+      <div class="section-head">
+        <div>
+          <span class="mod-num">MODULE 06</span>
+          <h2>Application Architecture & Crypto Agility.<br><span class="muted">Decoupling banking business logic from cryptographic primitives.</span></h2>
+        </div>
+        <p class="section-intro">Inspect the TypeScript/JavaScript architecture seam. Payment controllers express pure transactional intent, while the configured CryptoProvider owns algorithm implementation and policy enforcement.</p>
+      </div>
+
+      <div class="code-viewer-wrap">
+        <div class="code-tabs">
+          <button class="code-tab-btn active" data-tab="controller">PaymentController.ts</button>
+          <button class="code-tab-btn" data-tab="providerInterface">CryptoProvider.ts</button>
+          <button class="code-tab-btn" data-tab="classicalProvider">ClassicalProvider.ts</button>
+          <button class="code-tab-btn" data-tab="hybridProvider">HybridProvider.ts</button>
+          <button class="code-tab-btn" data-tab="pqcProvider">PQCProvider.ts</button>
+        </div>
+        <pre class="code-content-block" id="codeBlock">// Code will load here</pre>
+      </div>
+    </section>
+
+    <!-- MODULE 07: KEY MANAGEMENT AND HSM / KMS -->
+    <section class="section shell" id="hsm-kms">
+      <div class="section-head">
+        <div>
+          <span class="mod-num">MODULE 07</span>
+          <h2>Key Management and HSM / KMS Compatibility.<br><span class="muted">Hardware security module constraints and cloud KMS readiness.</span></h2>
+        </div>
+        <p class="section-intro">Migrating to post-quantum banking requires updating Hardware Security Modules (HSMs). Standard PKCS#11 v2.40 tokens lack memory slots and hardware arithmetic units (NTT) for lattice operations.</p>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table" aria-label="HSM and Cloud KMS Vendor Compatibility Matrix">
+          <thead>
+            <tr>
+              <th>HARDWARE / SERVICE</th>
+              <th>INTERFACE</th>
+              <th>ML-KEM (FIPS 203) STATUS</th>
+              <th>ML-DSA (FIPS 204) STATUS</th>
+              <th>FIPS 140-3 LEVEL</th>
+              <th>CONSTRAINTS & ROADMAP</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Thales Luna HSM 7 / 8</strong></td>
+              <td>PKCS#11 v3.2 Draft / REST</td>
+              <td><span class="impact-badge badge-green">Firmware v7.9+ Beta</span></td>
+              <td><span class="impact-badge badge-green">Firmware v7.9+ Beta</span></td>
+              <td>Level 3 (Pending Re-cert)</td>
+              <td>Requires memory repartitioning for 4 KB private keys.</td>
+            </tr>
+            <tr>
+              <td><strong>Utimaco CryptoServer CP5</strong></td>
+              <td>PKCS#11 / JCE / MS CNG</td>
+              <td><span class="impact-badge badge-green">Q-Safe Extension Available</span></td>
+              <td><span class="impact-badge badge-green">Q-Safe Extension Available</span></td>
+              <td>Level 3 Physical</td>
+              <td>Firmware update required; hardware acceleration limited.</td>
+            </tr>
+            <tr>
+              <td><strong>AWS Key Management Service</strong></td>
+              <td>AWS SDK / SigV4</td>
+              <td><span class="impact-badge badge-blue">Hybrid TLS Ingress Active</span></td>
+              <td><span class="impact-badge badge-yellow">Roadmap 2026/2027</span></td>
+              <td>Level 3 Cloud HSM</td>
+              <td>Post-quantum hybrid TLS supported; asymmetric KMS keys pending.</td>
+            </tr>
+            <tr>
+              <td><strong>Google Cloud KMS</strong></td>
+              <td>Cloud KMS API / gRPC</td>
+              <td><span class="impact-badge badge-blue">ALTS / Hybrid Ingress Active</span></td>
+              <td><span class="impact-badge badge-yellow">Preview Available</span></td>
+              <td>Level 3 HSM</td>
+              <td>BoringSSL PQC hybrid key exchange enabled across edge infrastructure.</td>
+            </tr>
+            <tr>
+              <td><strong>Azure Key Vault / Managed HSM</strong></td>
+              <td>Azure REST / KeyVault SDK</td>
+              <td><span class="impact-badge badge-yellow">Evaluation Phase</span></td>
+              <td><span class="impact-badge badge-yellow">Evaluation Phase</span></td>
+              <td>Level 3 HSM</td>
+              <td>Under active validation with Microsoft Research PQC library.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- MODULE 08: DATABASE AND DATA MIGRATION STRATEGY -->
+    <section class="section shell" id="database">
+      <div class="section-head">
+        <div>
+          <span class="mod-num">MODULE 08</span>
+          <h2>Database & Data Migration Strategy.<br><span class="muted">Key rewrapping versus bulk re-encryption, and historical signature retention.</span></h2>
+        </div>
+        <p class="section-intro">Do not rewrite petabytes of transactional tables when only the protecting Key Encryption Keys (KEKs) require migration. Symmetric AES-256 data remains quantum-resistant.</p>
+      </div>
+
+      <div class="upgrade-grid" style="grid-template-columns: repeat(2, 1fr);">
+        <div class="impact-col col-retained">
+          <div class="impact-header">
+            <b>1. ENVELOPE ENCRYPTION REWRAPPING (RECOMMENDED)</b>
+            <span class="impact-badge badge-green">ZERO DOWNTIME</span>
+          </div>
+          <p style="font-size:12px; line-height:1.7; color:var(--muted);">
+            In a modern banking database, table records are encrypted with local Data Encryption Keys (DEKs) using AES-256-GCM. The DEKs are encrypted (wrapped) by a master Key Encryption Key (KEK).
+            <br><br>
+            <strong>Migration Path:</strong> Un-wrap the DEK using the classical RSA-OAEP KEK, and immediately re-wrap it using ML-KEM-768. The millions of transactional customer records remain untouched in storage!
+          </p>
+        </div>
+
+        <div class="impact-col col-changed">
+          <div class="impact-header">
+            <b>2. HISTORICAL SIGNATURE PRESERVATION (RFC 3161)</b>
+            <span class="impact-badge badge-blue">LEGAL COMPLIANCE</span>
+          </div>
+          <p style="font-size:12px; line-height:1.7; color:var(--muted);">
+            Past payments signed with RSA-2048 cannot be retroactively re-signed by customers who approved them years ago.
+            <br><br>
+            <strong>Migration Path:</strong> Bundle historical transactions into Merkle trees and notarize the Merkle roots using a post-quantum ML-DSA-65 timestamping authority (RFC 3161 Evidence Records). This establishes non-repudiation proof that the transaction existed before RSA was cracked.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 09: CRYPTOGRAPHIC INVENTORY & CYCLONEDX 1.6 CBOM (Preserved & Enhanced) -->
     <section class="section cbom-section" id="cbom">
       <div class="shell">
         <div class="section-head">
-          <div><div class="eyebrow">VISIBILITY / 05</div><h2>Know what crypto<br><span class="muted">you actually run.</span></h2></div>
-          <p class="section-intro">A Cryptographic Bill of Materials (CBOM) records cryptographic assets and their context. It helps teams discover, assess and plan migrations.</p>
+          <div>
+            <span class="mod-num">MODULE 09</span>
+            <h2>Cryptographic Bill of Materials (CBOM).<br><span class="muted">Dynamic discovery conforming to CycloneDX 1.6 specifications.</span></h2>
+          </div>
+          <p class="section-intro">Automated discovery of all operational algorithms, parameter sets, OIDs, and migration statuses. Validates strictly against CycloneDX 1.6 schemas with zero private keys exposed.</p>
         </div>
         <div class="cbom-layout">
-          <div class="cbom-copy"><div class="cbom-stamp">CycloneDX<br><b>1.6</b></div><h3>From invisible dependencies to an inventory.</h3><p>This example inventory describes the algorithms used in the selected profile. Download the JSON to inspect a simplified CycloneDX 1.6-style CBOM example.</p><ul><li><span class="check">✓</span> Algorithm and primitive type</li><li><span class="check">✓</span> Profile and component context</li><li><span class="check">✓</span> Migration visibility</li></ul><button class="btn btn-dark" id="downloadCbom">Download CBOM JSON <span>↓</span></button></div>
-          <div class="json-panel"><div class="json-top"><span><i></i><i></i><i></i></span><b id="jsonProfile">crypto-inventory-classical.json</b><button id="copyJson">Copy</button></div><pre id="jsonPreview" aria-label="CBOM JSON preview"></pre></div>
+          <div class="cbom-copy">
+            <div class="cbom-stamp">CycloneDX<br><b>1.6</b></div>
+            <h3>From invisible dependencies to an auditable CBOM.</h3>
+            <p>Describes cryptographic assets in the active profile. Click below to download the validated CycloneDX 1.6 JSON artifact.</p>
+            <ul>
+              <li><span class="check">✓</span> Algorithm primitives & OIDs</li>
+              <li><span class="check">✓</span> Classical and Quantum Security Bits</li>
+              <li><span class="check">✓</span> Zero Private Keys or Secrets in Output</li>
+            </ul>
+            <div id="cbomValidationStatus" style="margin-bottom:14px;"></div>
+            <button class="btn btn-dark" id="downloadCbom">Download CBOM JSON <span>↓</span></button>
+          </div>
+          <div class="json-panel">
+            <div class="json-top">
+              <span><i></i><i></i><i></i></span>
+              <b id="jsonProfile">crypto-inventory-classical.json</b>
+              <button id="copyJson">Copy</button>
+            </div>
+            <pre id="jsonPreview" aria-label="CBOM JSON preview"></pre>
+          </div>
         </div>
-        <p class="small-print">The downloadable file is a teaching example with a CycloneDX 1.6 document envelope and illustrative cryptographic inventory properties. Validate against your chosen CBOM schema/tooling before using it as a compliance artifact.</p>
       </div>
     </section>
 
+    <!-- MODULE 10: PERFORMANCE AND INFRASTRUCTURE BENCHMARK -->
+    <section class="section shell" id="benchmarks">
+      <div class="section-head">
+        <div>
+          <span class="mod-num">MODULE 10</span>
+          <h2>Performance & Infrastructure Benchmark.<br><span class="muted">Live in-browser measurements of keygen, signing, encapsulation & sizes.</span></h2>
+        </div>
+        <p class="section-intro">Execute actual iterations in your current browser runtime. Discloses platform hardware concurrency, execution times in milliseconds, and network payload expansion ratios.</p>
+      </div>
+
+      <div class="workbench-shell">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+          <div>
+            <div style="font:10px var(--mono); color:var(--muted);" id="benchEnvDetails">Click button to profile browser environment and execute real operations.</div>
+          </div>
+          <button class="btn btn-dark" id="btnRunBenchmark">Execute Live Cryptographic Benchmark ⚡</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table" aria-label="Performance Benchmark Comparison Table">
+            <thead>
+              <tr>
+                <th>ALGORITHM SUITE</th>
+                <th>KEYGEN / SETUP</th>
+                <th>SIGN / ENCAP TIME</th>
+                <th>VERIFY / DECAP TIME</th>
+                <th>PUBLIC KEY SIZE</th>
+                <th>SIG / CIPHERTEXT SIZE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>RSA-PSS-2048 (Classical Sig)</strong></td>
+                <td>~15 ms</td>
+                <td id="benchRsaSign">—</td>
+                <td id="benchRsaVerify">—</td>
+                <td>294 B</td>
+                <td id="benchRsaSigSize">256 B</td>
+              </tr>
+              <tr>
+                <td><strong>ML-DSA-65 (FIPS 204 PQC Sig)</strong></td>
+                <td>~8 ms</td>
+                <td id="benchDsaSign">—</td>
+                <td id="benchDsaVerify">—</td>
+                <td>1,952 B (6.6×)</td>
+                <td id="benchDsaSigSize">3,309 B (12.9×)</td>
+              </tr>
+              <tr>
+                <td><strong>RSA-OAEP-2048 (Classical Enc)</strong></td>
+                <td>~15 ms</td>
+                <td id="benchRsaEnc">—</td>
+                <td id="benchRsaDec">—</td>
+                <td>294 B</td>
+                <td id="benchRsaCtSize">256 B</td>
+              </tr>
+              <tr>
+                <td><strong>ML-KEM-768 (FIPS 203 KEM)</strong></td>
+                <td>~4 ms</td>
+                <td id="benchKemEncap">—</td>
+                <td id="benchKemDecap">—</td>
+                <td>1,184 B (4.0×)</td>
+                <td id="benchKemCtSize">1,088 B (4.25×)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="compare-foot" style="margin-top:18px;">
+          <span>PAYLOAD EXPANSION</span>
+          <p>The post-quantum digital signature is <strong id="benchExpansionRatio">12.9×</strong> larger than RSA-2048. Factor this overhead into API gateway maximum request body limits, database column sizing (BLOB vs VARCHAR), and mobile network bandwidth budgets.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 11: SECURITY THREAT LABORATORY -->
+    <section class="section shell" id="threat-lab">
+      <div class="section-head">
+        <div>
+          <span class="mod-num">MODULE 11</span>
+          <h2>Security Threat Laboratory.<br><span class="muted">Interactive simulations and real cryptographic attack tests.</span></h2>
+        </div>
+        <p class="section-intro">Distinguishes real cryptographic tests (tampering, downgrade blocking, malformed keys) from educational quantum threat models (HNDL, Shor's factoring, clearing house negotiations).</p>
+      </div>
+
+      <div class="threat-grid">
+        <!-- Threat 1 -->
+        <div class="threat-card">
+          <div class="threat-top">
+            <h4>1. Harvest-Now-Decrypt-Later (HNDL)</h4>
+            <span class="impact-badge badge-yellow">EDUCATIONAL SIMULATION</span>
+          </div>
+          <p class="threat-desc">Adversaries tap fiber backbones to record encrypted bank transactions today, waiting for a quantum computer to factor classical session keys in 2030+.</p>
+          <div class="threat-result-box" id="threatRes_hndl"></div>
+          <div class="threat-footer">
+            <span style="font:9px var(--mono); color:var(--muted);">TARGET: RSA-OAEP / TLS</span>
+            <button class="btn btn-outline threat-run-btn" data-threat="hndl">Simulate HNDL Attack</button>
+          </div>
+        </div>
+
+        <!-- Threat 2 -->
+        <div class="threat-card">
+          <div class="threat-top">
+            <h4>2. Shor's Algorithm Factoring</h4>
+            <span class="impact-badge badge-yellow">EDUCATIONAL SIMULATION</span>
+          </div>
+          <p class="threat-desc">Evaluates the mathematical complexity of finding prime factors via quantum order-finding versus classical General Number Field Sieve (GNFS).</p>
+          <div class="threat-result-box" id="threatRes_shor"></div>
+          <div class="threat-footer">
+            <span style="font:9px var(--mono); color:var(--muted);">TARGET: RSA-2048 / ECDSA</span>
+            <button class="btn btn-outline threat-run-btn" data-threat="shor">Analyze Quantum Hardness</button>
+          </div>
+        </div>
+
+        <!-- Threat 3 -->
+        <div class="threat-card">
+          <div class="threat-top">
+            <h4>3. Tampered Payment Signature</h4>
+            <span class="impact-badge badge-blue">REAL CRYPTOGRAPHIC TEST</span>
+          </div>
+          <p class="threat-desc">Signs payment of ₹12,500 using ML-DSA-65, alters payload to ₹92,500, and verifies that the FIPS 204 verifier mathematically rejects the forgery.</p>
+          <div class="threat-result-box" id="threatRes_tampered-signature"></div>
+          <div class="threat-footer">
+            <span style="font:9px var(--mono); color:var(--muted);">PRIMITIVE: FIPS 204 ML-DSA</span>
+            <button class="btn btn-outline threat-run-btn" data-threat="tampered-signature">Run Tampering Test</button>
+          </div>
+        </div>
+
+        <!-- Threat 4 -->
+        <div class="threat-card">
+          <div class="threat-top">
+            <h4>4. Tampered Ciphertext & Auth Tag</h4>
+            <span class="impact-badge badge-blue">REAL CRYPTOGRAPHIC TEST</span>
+          </div>
+          <p class="threat-desc">Corrupts bits in an ML-KEM + AES-256-GCM encrypted account field and verifies that the Galois authentication tag rejects the forgery before decryption.</p>
+          <div class="threat-result-box" id="threatRes_tampered-ciphertext"></div>
+          <div class="threat-footer">
+            <span style="font:9px var(--mono); color:var(--muted);">PRIMITIVE: AES-256-GCM</span>
+            <button class="btn btn-outline threat-run-btn" data-threat="tampered-ciphertext">Run Tag Test</button>
+          </div>
+        </div>
+
+        <!-- Threat 5 -->
+        <div class="threat-card">
+          <div class="threat-top">
+            <h4>5. Protocol Downgrade Attack</h4>
+            <span class="impact-badge badge-blue">REAL CRYPTOGRAPHIC TEST</span>
+          </div>
+          <p class="threat-desc">An attacker strips the PQC signature slice from a hybrid message. Tests that the STRICT_BOTH_REQUIRED policy immediately blocks the rollback.</p>
+          <div class="threat-result-box" id="threatRes_downgrade-attack"></div>
+          <div class="threat-footer">
+            <span style="font:9px var(--mono); color:var(--muted);">POLICY: STRICT_BOTH_REQUIRED</span>
+            <button class="btn btn-outline threat-run-btn" data-threat="downgrade-attack">Test Downgrade Block</button>
+          </div>
+        </div>
+
+        <!-- Threat 6 -->
+        <div class="threat-card">
+          <div class="threat-top">
+            <h4>6. Algorithm Substitution Attack</h4>
+            <span class="impact-badge badge-blue">REAL CRYPTOGRAPHIC TEST</span>
+          </div>
+          <p class="threat-desc">Adversary injects a bogus algorithm identifier into the message envelope. Verifies that the provider seam checks algorithm pinning before verification.</p>
+          <div class="threat-result-box" id="threatRes_algorithm-substitution"></div>
+          <div class="threat-footer">
+            <span style="font:9px var(--mono); color:var(--muted);">SEAM: CRYPTOPROVIDER PINNING</span>
+            <button class="btn btn-outline threat-run-btn" data-threat="algorithm-substitution">Test Substitution</button>
+          </div>
+        </div>
+
+        <!-- Threat 7 -->
+        <div class="threat-card">
+          <div class="threat-top">
+            <h4>7. Weak Fallback Policy Exploitation</h4>
+            <span class="impact-badge badge-yellow">EDUCATIONAL SIMULATION</span>
+          </div>
+          <p class="threat-desc">Demonstrates why "soft fallback" policies permit attackers to DoS the PQC subsystem and force the bank onto insecure classical channels.</p>
+          <div class="threat-result-box" id="threatRes_weak-fallback"></div>
+          <div class="threat-footer">
+            <span style="font:9px var(--mono); color:var(--muted);">CONFIGURATION AUDIT</span>
+            <button class="btn btn-outline threat-run-btn" data-threat="weak-fallback">Inspect Fallback Flaw</button>
+          </div>
+        </div>
+
+        <!-- Threat 8 -->
+        <div class="threat-card">
+          <div class="threat-top">
+            <h4>8. Invalid Key & Malformed Vector Handling</h4>
+            <span class="impact-badge badge-blue">REAL CRYPTOGRAPHIC TEST</span>
+          </div>
+          <p class="threat-desc">Supplies truncated key arrays and out-of-range lattice vectors to verify exception handling and memory safety in the cryptographic engine.</p>
+          <div class="threat-result-box" id="threatRes_invalid-key-handling"></div>
+          <div class="threat-footer">
+            <span style="font:9px var(--mono); color:var(--muted);">ROBUSTNESS: VECTOR BOUNDS</span>
+            <button class="btn btn-outline threat-run-btn" data-threat="invalid-key-handling">Test Key Handling</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE 12: MIGRATION ROADMAP & CHECKLIST -->
+    <section class="section shell" id="roadmap">
+      <div class="section-head">
+        <div>
+          <span class="mod-num">MODULE 12</span>
+          <h2>Practical 12-Phase Migration Roadmap.<br><span class="muted">Structured transition lifecycle for banking infrastructure.</span></h2>
+        </div>
+        <p class="section-intro">Follow the complete practical path from initial cryptographic asset discovery to gradual production cutover and legacy algorithm deprecation.</p>
+      </div>
+
+      <div class="roadmap-phases">
+        <div class="phase-card active-phase">
+          <small>PHASE 01</small>
+          <b>Discover Assets</b>
+          <p>Scan codebases, TLS endpoints and certificates; establish baseline CBOM.</p>
+        </div>
+        <div class="phase-card">
+          <small>PHASE 02</small>
+          <b>Classify Risks</b>
+          <p>Identify long-lived customer data subject to HNDL recording.</p>
+        </div>
+        <div class="phase-card">
+          <small>PHASE 03</small>
+          <b>Audit Dependencies</b>
+          <p>Inspect third-party SDKs, libraries, clearing gateways, and tokens.</p>
+        </div>
+        <div class="phase-card">
+          <small>PHASE 04</small>
+          <b>Hardware / HSMs</b>
+          <p>Assess HSM memory limitations and PKCS#11 v3.2 firmware support.</p>
+        </div>
+        <div class="phase-card">
+          <small>PHASE 05</small>
+          <b>Crypto Agility Seam</b>
+          <p>Implement CryptoProvider interface; remove hardcoded RSA calls.</p>
+        </div>
+        <div class="phase-card">
+          <small>PHASE 06</small>
+          <b>PQC Test Lab</b>
+          <p>Deploy FIPS 203 & 204 staging environment for developer validation.</p>
+        </div>
+        <div class="phase-card">
+          <small>PHASE 07</small>
+          <b>Hybrid Interoperability</b>
+          <p>Establish dual signatures and hybrid KEM wrappers across core routes.</p>
+        </div>
+        <div class="phase-card">
+          <small>PHASE 08</small>
+          <b>Benchmark & Validate</b>
+          <p>Load test larger payloads against TCP MTU and database constraints.</p>
+        </div>
+        <div class="phase-card">
+          <small>PHASE 09</small>
+          <b>Pilot Deployment</b>
+          <p>Launch non-critical payment rail with bilateral hybrid testing partners.</p>
+        </div>
+        <div class="phase-card">
+          <small>PHASE 10</small>
+          <b>Production Cutover</b>
+          <p>Roll out hybrid payment routing across retail and interbank channels.</p>
+        </div>
+        <div class="phase-card">
+          <small>PHASE 11</small>
+          <b>Retire Classical</b>
+          <p>Phase out RSA-2048 once regulatory mandates and peers support pure PQC.</p>
+        </div>
+        <div class="phase-card">
+          <small>PHASE 12</small>
+          <b>Continuous CBOM</b>
+          <p>Automate CI/CD cryptographic bill of materials generation and audit.</p>
+        </div>
+      </div>
+
+      <!-- Interactive Implementation Checklist -->
+      <div class="checklist-box">
+        <div class="checklist-progress-wrap">
+          <div class="checklist-header">
+            <b>BANKING COMPLIANCE & READINESS CHECKLIST</b>
+            <span id="checklistProgressText">0% (0/10 items verified)</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="checklistFill"></div>
+          </div>
+        </div>
+
+        <div class="checklist-items">
+          <label class="checklist-item">
+            <input type="checkbox" class="chk-box">
+            <span>Automated CycloneDX 1.6 CBOM generated in CI/CD build pipeline</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" class="chk-box">
+            <span>CryptoProvider abstraction seam decouples business logic from primitives</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" class="chk-box">
+            <span>Customer account numbers protected with ML-KEM-768 + AES-256-GCM</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" class="chk-box">
+            <span>Digital signatures upgraded to FIPS 204 ML-DSA-65 with 3,309 B buffer support</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" class="chk-box">
+            <span>Hybrid verification policy enforces STRICT_BOTH_REQUIRED (anti-downgrade)</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" class="chk-box">
+            <span>Edge API Gateway configured for hybrid X25519MLKEM768 TLS 1.3 exchange</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" class="chk-box">
+            <span>Database Key Encryption Keys (KEKs) re-wrapped without bulk re-encryption</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" class="chk-box">
+            <span>Hardware Security Module (HSM) vendor roadmap validated for FIPS 140-3</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" class="chk-box">
+            <span>Historical transaction archives protected with RFC 3161 PQC timestamping</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" class="chk-box">
+            <span>Clearing house partner bilateral testing agreement executed for ISO 20022 PQC</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- IN-BROWSER AUTOMATED TEST SUITE RUNNER (Section 6) -->
+    <section class="section shell" id="tests">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">AUTOMATED VERIFICATION / SECTION 6 TESTS</div>
+          <h2>Live Cryptographic & System Test Suite.<br><span class="muted">Run all 12 unit and integration tests directly in your browser.</span></h2>
+        </div>
+        <p class="section-intro">Executes real cryptographic signing, verification, encapsulation, decryption, corruption rejection, provider switching, downgrade resistance, and CBOM schema compliance.</p>
+      </div>
+
+      <div class="test-suite-panel">
+        <div class="test-summary-bar">
+          <div id="testSuiteSummary">
+            <span class="impact-badge badge-blue">12 TESTS READY TO EXECUTE</span>
+          </div>
+          <button class="btn btn-dark" id="btnRunTestSuite">Run Cryptographic & System Test Suite ▶</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="test-table" aria-label="Cryptographic and system test suite results">
+            <thead>
+              <tr style="text-align:left; background:var(--soft);">
+                <th style="padding:10px 12px; font:9px var(--mono); color:var(--muted);">#</th>
+                <th style="padding:10px 12px; font:9px var(--mono); color:var(--muted);">TEST CASE</th>
+                <th style="padding:10px 12px; font:9px var(--mono); color:var(--muted);">STATUS</th>
+                <th style="padding:10px 12px; font:9px var(--mono); color:var(--muted);">ASSERTION RESULT / DURATION</th>
+              </tr>
+            </thead>
+            <tbody id="testTableBody">
+              <tr>
+                <td colspan="4" style="text-align:center; padding:24px; color:var(--muted); font:11px var(--mono);">
+                  Click "Run Cryptographic & System Test Suite" to execute assertions.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL CALL TO ACTION (Preserved UI/UX) -->
     <section class="final-cta shell">
-      <div><div class="eyebrow">YOUR NEXT STEP</div><h2>Make the migration<br><span class="muted">measurable.</span></h2><p>Start with discovery. Inventory the algorithms, classify sensitive data, define crypto-agility interfaces and test a staged migration plan.</p></div>
-      <a class="btn btn-dark" href="#journey">Explore the four upgrades <span>↗</span></a>
+      <div>
+        <div class="eyebrow">ACTIONABLE NEXT STEPS</div>
+        <h2>Make the migration<br><span class="muted">measurable and secure.</span></h2>
+        <p>Start with cryptographic discovery. Inventory the algorithms, classify sensitive long-lived data, deploy the CryptoProvider agility seam, and establish strict hybrid verification.</p>
+      </div>
+      <a class="btn btn-dark" href="#playground">Explore Central Playground <span>↗</span></a>
     </section>
   </main>
 
-  <footer class="footer"><a class="brand" href="#"><span class="brand-mark">C<span>.</span></span><span>CRYPTOSHIFT <small>INTERACTIVE LAB</small></span></a><span>Educational demo · Static website · Built for the quantum transition</span><a href="#main">Back to top ↑</a></footer>
+  <!-- FOOTER (Preserved UI/UX) -->
+  <footer class="footer">
+    <a class="brand" href="#">
+      <span class="brand-mark">C<span>.</span></span>
+      <span>CRYPTOSHIFT <small>INTERACTIVE LAB</small></span>
+    </a>
+    <span>Educational demo · Static website · Built for the quantum transition · FIPS 203 & 204 Standards</span>
+    <a href="#main">Back to top ↑</a>
+  </footer>
+
+  <!-- MODULAR SCRIPTS (Ordered for dependency injection) -->
+  <script src="js/lib/noble-pqc.bundle.js"></script>
+  <script src="js/crypto-core.js"></script>
+  <script src="js/providers.js"></script>
+  <script src="js/cbom-generator.js"></script>
+  <script src="js/benchmarks.js"></script>
+  <script src="js/threat-lab.js"></script>
+  <script src="js/test-suite.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

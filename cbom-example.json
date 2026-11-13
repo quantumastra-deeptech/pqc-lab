@@ -1,0 +1,267 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:ab712911-4f14-47b2-840a-45cdb3219382",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-11-13T16:09:55.024Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "CryptoShift Lab CBOM Generator",
+          "version": "2.0.0",
+          "description": "Cryptographic discovery and CycloneDX 1.6 CBOM automation engine for banking payments"
+        }
+      ]
+    },
+    "component": {
+      "type": "application",
+      "bom-ref": "banking-payment-service-core",
+      "name": "BankCore Payment Settlement Engine",
+      "version": "4.12.0",
+      "description": "Mission-critical retail and interbank payment processing platform"
+    },
+    "properties": [
+      {
+        "name": "crypto:profile",
+        "value": "pqc"
+      },
+      {
+        "name": "crypto:profile-label",
+        "value": "Post-Quantum Banking Payment Architecture (To-Be FIPS Compliant)"
+      },
+      {
+        "name": "crypto:overall-risk-rating",
+        "value": "QUANTUM_SAFE"
+      },
+      {
+        "name": "crypto:compliance-framework",
+        "value": "NIST PQC Migration / FIPS 203 / FIPS 204"
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "cryptographic-asset",
+      "bom-ref": "crypto-asset-ml-dsa-65",
+      "name": "ML-DSA-65",
+      "description": "Payment authorization signing, Interbank settlement message authentication",
+      "cryptoProperties": {
+        "assetType": "algorithm",
+        "algorithmProperties": {
+          "primitive": "signature",
+          "parameterSetIdentifier": "Category 3 (Matrix Dimension 6x5, ETA=4)",
+          "executionEnvironment": "software-plain",
+          "implementationPlatform": "@noble/post-quantum (audited JS)",
+          "certificationLevel": [
+            "NIST FIPS 204"
+          ],
+          "cryptoFunctions": [
+            "sign",
+            "verify"
+          ],
+          "classicalSecurityLevel": 192,
+          "nistQuantumSecurityLevel": 3
+        },
+        "oid": "2.16.840.1.101.3.4.3.18",
+        "relatedCryptoMaterial": []
+      },
+      "properties": [
+        {
+          "name": "crypto:protocol-binding",
+          "value": "ISO 20022 XML with PQC Signature Envelope"
+        },
+        {
+          "name": "crypto:owning-component",
+          "value": "Payment Authorization Service (PQC Provider)"
+        },
+        {
+          "name": "crypto:underlying-library",
+          "value": "@noble/post-quantum v0.2.x"
+        },
+        {
+          "name": "crypto:migration-status",
+          "value": "ACTIVE_PQC_PRODUCTION"
+        },
+        {
+          "name": "crypto:quantum-risk-level",
+          "value": "SECURE_NIST_STANDARDIZED"
+        },
+        {
+          "name": "crypto:rationale",
+          "value": "Based on Module Learning with Errors (MLWE) over module lattices. Resists known quantum algorithms."
+        }
+      ]
+    },
+    {
+      "type": "cryptographic-asset",
+      "bom-ref": "crypto-asset-ml-kem-768",
+      "name": "ML-KEM-768",
+      "description": "Quantum-safe shared-secret establishment for envelope field encryption & KEK wrapping",
+      "cryptoProperties": {
+        "assetType": "algorithm",
+        "algorithmProperties": {
+          "primitive": "kem",
+          "parameterSetIdentifier": "Category 3 (Matrix Dimension 3x3, ETA1=2, ETA2=2)",
+          "executionEnvironment": "software-plain",
+          "implementationPlatform": "@noble/post-quantum (audited JS)",
+          "certificationLevel": [
+            "NIST FIPS 203"
+          ],
+          "cryptoFunctions": [
+            "encapsulate",
+            "decapsulate"
+          ],
+          "classicalSecurityLevel": 192,
+          "nistQuantumSecurityLevel": 3
+        },
+        "oid": "2.16.840.1.101.3.4.4.2",
+        "relatedCryptoMaterial": []
+      },
+      "properties": [
+        {
+          "name": "crypto:protocol-binding",
+          "value": "Banking Microservice KEM Protocol"
+        },
+        {
+          "name": "crypto:owning-component",
+          "value": "Customer Account Protection Module"
+        },
+        {
+          "name": "crypto:underlying-library",
+          "value": "@noble/post-quantum v0.2.x"
+        },
+        {
+          "name": "crypto:migration-status",
+          "value": "ACTIVE_PQC_PRODUCTION"
+        },
+        {
+          "name": "crypto:quantum-risk-level",
+          "value": "SECURE_NIST_STANDARDIZED"
+        },
+        {
+          "name": "crypto:rationale",
+          "value": "Eliminates Harvest-Now-Decrypt-Later threats through lattice-based key encapsulation."
+        }
+      ]
+    },
+    {
+      "type": "cryptographic-asset",
+      "bom-ref": "crypto-asset-aes-256-gcm",
+      "name": "AES-256-GCM",
+      "description": "Authenticated field encryption of sensitive customer PAN/IBAN & database TDE",
+      "cryptoProperties": {
+        "assetType": "algorithm",
+        "algorithmProperties": {
+          "primitive": "ae",
+          "parameterSetIdentifier": "256-bit key, 96-bit unique IV, 128-bit ICV auth tag",
+          "executionEnvironment": "software-plain",
+          "implementationPlatform": "w3c-webcrypto",
+          "certificationLevel": [
+            "NIST SP 800-38D",
+            "FIPS 197"
+          ],
+          "cryptoFunctions": [
+            "encrypt",
+            "decrypt",
+            "authenticate"
+          ],
+          "classicalSecurityLevel": 256,
+          "nistQuantumSecurityLevel": 5
+        },
+        "oid": "2.16.840.1.101.3.4.1.46",
+        "relatedCryptoMaterial": []
+      },
+      "properties": [
+        {
+          "name": "crypto:protocol-binding",
+          "value": "Application Envelope Encryption (AEE)"
+        },
+        {
+          "name": "crypto:owning-component",
+          "value": "Database Storage & Ledger Manager"
+        },
+        {
+          "name": "crypto:underlying-library",
+          "value": "Web Cryptography API (SubtleCrypto)"
+        },
+        {
+          "name": "crypto:migration-status",
+          "value": "RETAINED_NO_CHANGE_NEEDED"
+        },
+        {
+          "name": "crypto:quantum-risk-level",
+          "value": "LOW_QUANTUM_RESISTANT"
+        },
+        {
+          "name": "crypto:rationale",
+          "value": "Grover's quantum algorithm requires O(2^128) operations against AES-256, well beyond practical reach."
+        }
+      ]
+    },
+    {
+      "type": "cryptographic-asset",
+      "bom-ref": "crypto-asset-hkdf-sha-256",
+      "name": "HKDF-SHA-256",
+      "description": "Derives independent AES-256-GCM keys from ML-KEM shared secrets with domain separation",
+      "cryptoProperties": {
+        "assetType": "algorithm",
+        "algorithmProperties": {
+          "primitive": "kdf",
+          "parameterSetIdentifier": "Extract-and-Expand with SHA-256",
+          "executionEnvironment": "software-plain",
+          "implementationPlatform": "w3c-webcrypto",
+          "certificationLevel": [
+            "RFC 5869",
+            "NIST SP 800-56C Rev 2"
+          ],
+          "cryptoFunctions": [
+            "kdf"
+          ],
+          "classicalSecurityLevel": 256,
+          "nistQuantumSecurityLevel": 5
+        },
+        "oid": "1.2.840.113549.1.9.16.3.17",
+        "relatedCryptoMaterial": []
+      },
+      "properties": [
+        {
+          "name": "crypto:protocol-binding",
+          "value": "Cryptographic Agility Seam"
+        },
+        {
+          "name": "crypto:owning-component",
+          "value": "CryptoProvider Seam"
+        },
+        {
+          "name": "crypto:underlying-library",
+          "value": "Web Cryptography API"
+        },
+        {
+          "name": "crypto:migration-status",
+          "value": "ACTIVE_PQC_PRODUCTION"
+        },
+        {
+          "name": "crypto:quantum-risk-level",
+          "value": "LOW_QUANTUM_RESISTANT"
+        },
+        {
+          "name": "crypto:rationale",
+          "value": "Approved PRF construction for key derivation."
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "banking-payment-service-core",
+      "dependsOn": [
+        "crypto-asset-ml-dsa-65",
+        "crypto-asset-ml-kem-768",
+        "crypto-asset-aes-256-gcm",
+        "crypto-asset-hkdf-sha-256"
+      ]
+    }
+  ]
+}
