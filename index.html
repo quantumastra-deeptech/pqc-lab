@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="description" content="An interactive, beginner-friendly lab exploring post-quantum cryptography for banking payment services." />
+  <title>CryptoShift Lab — Post-Quantum Banking</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="CryptoShift Lab home">
+      <span class="brand-mark">C<span>.</span></span>
+      <span>CRYPTOSHIFT <small>INTERACTIVE LAB</small></span>
+    </a>
+    <nav class="topnav" aria-label="Main navigation">
+      <a href="#journey">Learning path</a>
+      <a href="#playground">Playground</a>
+      <a href="#cbom">CBOM</a>
+    </nav>
+    <a class="top-cta" href="#playground">Enter the lab <span>↗</span></a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Open navigation" aria-expanded="false">☰</button>
+  </header>
+
+  <main id="main">
+    <section class="hero shell">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="pulse"></span> BANKING SECURITY · LEARNING ENVIRONMENT</div>
+        <h1>Prepare your<br>payments for the<br><span class="highlight">quantum era.</span></h1>
+        <p class="hero-lede">Explore how a traditional payment service evolves into a post-quantum-ready system — one concept, one experiment, one decision at a time.</p>
+        <div class="hero-actions">
+          <a class="btn btn-dark" href="#journey">Start the journey <span>↓</span></a>
+          <a class="text-link" href="#playground">Jump into playground <span>↗</span></a>
+        </div>
+        <div class="hero-footnote"><span class="dot-green"></span> Static browser lab · No account required</div>
+      </div>
+      <div class="hero-art" aria-label="Illustration of a payment moving through a post-quantum security gateway">
+        <div class="art-label label-top">PAYMENT REQUEST <span>01 / 04</span></div>
+        <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
+        <div class="core-card">
+          <div class="core-icon">↗</div>
+          <div class="core-title">PAYMENT<br>GATEWAY</div>
+          <div class="core-sub">CRYPTO AGILITY LAYER</div>
+          <div class="core-status"><i></i> PROTECTED FLOW</div>
+        </div>
+        <div class="float-chip chip-red"><b>RSA</b><small>LEGACY</small></div>
+        <div class="float-chip chip-blue"><b>ML-DSA</b><small>SIGNATURE</small></div>
+        <div class="float-chip chip-yellow"><b>ML-KEM</b><small>KEY SETUP</small></div>
+        <div class="float-chip chip-green"><b>AES-256</b><small>DATA</small></div>
+        <div class="art-label label-bottom">CLASSICAL <span>→</span> POST-QUANTUM</div>
+      </div>
+    </section>
+
+    <section class="ticker" aria-label="Lab topics">
+      <div>FIPS 203 <b>✳</b> ML-KEM</div><div>FIPS 204 <b>✳</b> ML-DSA</div><div>HYBRID CRYPTOGRAPHY <b>✳</b></div><div>CRYPTO AGILITY <b>✳</b></div><div>CYCLONEDX 1.6 <b>✳</b> CBOM</div>
+    </section>
+
+    <section class="section shell" id="journey">
+      <div class="section-head">
+        <div><div class="eyebrow">THE MISSION / 01</div><h2>Four upgrades.<br><span class="muted">One safer payment flow.</span></h2></div>
+        <p class="section-intro">Follow the transformation from a tightly coupled legacy service to an algorithm-agile design. Select any card to learn what changes and why.</p>
+      </div>
+      <div class="upgrade-grid">
+        <button class="upgrade-card card-red" data-topic="signature">
+          <span class="card-index">01 / SIGN</span><span class="card-symbol">✳</span>
+          <h3>Post-quantum<br>signatures</h3><p>RSA-PSS → ML-DSA-65</p>
+          <span class="card-bottom">Explore the change <b>↗</b></span>
+        </button>
+        <button class="upgrade-card card-blue" data-topic="encryption">
+          <span class="card-index">02 / PROTECT</span><span class="card-symbol">⌁</span>
+          <h3>Harvest-resistant<br>encryption</h3><p>RSA-OAEP → ML-KEM-768 + AES-256-GCM</p>
+          <span class="card-bottom">Explore the change <b>↗</b></span>
+        </button>
+        <button class="upgrade-card card-yellow" data-topic="agility">
+          <span class="card-index">03 / ABSTRACT</span><span class="card-symbol">⤢</span>
+          <h3>Crypto-agility<br>seam</h3><p>Hardcoded crypto → CryptoProvider</p>
+          <span class="card-bottom">Explore the change <b>↗</b></span>
+        </button>
+        <button class="upgrade-card card-green" data-topic="cbom">
+          <span class="card-index">04 / DISCOVER</span><span class="card-symbol">▤</span>
+          <h3>Cryptographic<br>inventory</h3><p>Unknown assets → CycloneDX 1.6 CBOM</p>
+          <span class="card-bottom">Explore the change <b>↗</b></span>
+        </button>
+      </div>
+      <div class="topic-detail" id="topicDetail" aria-live="polite">
+        <div class="topic-detail-tag">SELECT A MISSION ABOVE</div>
+        <h3>Your learning panel will appear here.</h3>
+        <p>Choose one of the four upgrades to see the plain-language explanation, key terms and practical impact.</p>
+      </div>
+    </section>
+
+    <section class="dark-section" id="playground">
+      <div class="shell playground-shell">
+        <div class="section-head dark-head">
+          <div><div class="eyebrow">HANDS-ON / 02</div><h2>Change the profile.<br><span class="dark-muted">Watch the system respond.</span></h2></div>
+          <p class="section-intro">Imagine the payment controller asks a provider to sign and protect data. The selected profile decides which cryptographic building blocks are used — without changing controller code.</p>
+        </div>
+        <div class="lab-layout">
+          <aside class="profile-panel">
+            <div class="panel-kicker">CRYPTO PROFILE</div>
+            <h3>Choose your<br>security posture.</h3>
+            <div class="profile-options" role="group" aria-label="Cryptographic profile">
+              <button class="profile-option active" data-profile="classical" aria-pressed="true"><span class="radio"></span><span><b>Classical</b><small>Legacy algorithms</small></span><em class="pill pill-red">AS-IS</em></button>
+              <button class="profile-option" data-profile="pqc" aria-pressed="false"><span class="radio"></span><span><b>Post-quantum</b><small>NIST PQC standards</small></span><em class="pill pill-green">TO-BE</em></button>
+              <button class="profile-option" data-profile="hybrid" aria-pressed="false"><span class="radio"></span><span><b>Hybrid</b><small>Classical + PQC</small></span><em class="pill pill-blue">TRANSITION</em></button>
+            </div>
+            <div class="profile-note"><span>ⓘ</span><p><b>Crypto agility</b> means the application can change cryptographic choices through configuration, not scattered code edits.</p></div>
+            <label class="env-label" for="envValue">Environment variable</label>
+            <div class="env-code"><code id="envValue">CRYPTO_PROFILE=classical</code><button id="copyEnv" aria-label="Copy environment variable">▢</button></div>
+          </aside>
+          <div class="flow-panel">
+            <div class="flow-header"><span>PAYMENT REQUEST</span><span class="live-state"><i></i> LIVE SIMULATION</span></div>
+            <div class="payment-box">
+              <div class="payment-icon">₹</div><div><small>TRANSFER AMOUNT</small><strong>₹ 12,500.00</strong><small>From account •••• 4821</small></div><span class="payment-tag">DEMO</span>
+            </div>
+            <div class="flow-steps">
+              <div class="flow-step"><span class="step-num">01</span><div><b>Sign the payment</b><small id="signAlgo">RSA-PSS-2048</small></div><span class="step-state" id="signState">CLASSICAL</span></div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-step"><span class="step-num">02</span><div><b>Protect account field</b><small id="encAlgo">RSA-OAEP</small></div><span class="step-state" id="encState">CLASSICAL</span></div>
+              <div class="flow-arrow">↓</div>
+              <div class="flow-step"><span class="step-num">03</span><div><b>Record crypto metadata</b><small id="metaAlgo">Algorithm inventory unavailable</small></div><span class="step-state" id="metaState">LIMITED</span></div>
+            </div>
+            <div class="flow-footer"><div><span class="result-dot" id="resultDot"></span><span id="resultText">Legacy profile active</span></div><button class="run-btn" id="runDemo">Run payment demo <span>→</span></button></div>
+            <div class="demo-output" id="demoOutput" aria-live="polite">Ready. Run the demo to see the selected profile's payment flow.</div>
+          </div>
+        </div>
+        <div class="disclaimer">Learning simulation only. This page does not generate production keys, sign real payments, encrypt account data, or provide a security certification.</div>
+      </div>
+    </section>
+
+    <section class="section shell" id="signature-lab">
+      <div class="section-head">
+        <div><div class="eyebrow">DEEP DIVE / 03</div><h2>Security has a<br><span class="muted">size and a shape.</span></h2></div>
+        <p class="section-intro">Post-quantum algorithms change more than the math. They can change key sizes, signature sizes, network payloads and operational requirements.</p>
+      </div>
+      <div class="compare-wrap">
+        <div class="compare-top"><div><span class="mini-label">SIGNATURE SIZE EXPLORER</span><h3>One signature. A bigger envelope.</h3></div><span class="scale-note">Illustrative fixed-size comparison</span></div>
+        <div class="size-row">
+          <div class="size-meta"><span class="swatch swatch-red"></span><b>RSA-PSS-2048</b><strong>256 B</strong></div>
+          <div class="size-track"><div class="size-fill fill-red" style="width:7.74%"></div></div>
+          <small>Classical</small>
+        </div>
+        <div class="size-row">
+          <div class="size-meta"><span class="swatch swatch-green"></span><b>ML-DSA-65</b><strong>3,309 B</strong></div>
+          <div class="size-track"><div class="size-fill fill-green" style="width:100%"></div></div>
+          <small>Post-quantum</small>
+        </div>
+        <div class="compare-insight"><span class="insight-star">✳</span><p><b>About 12.9× larger</b> for the signature payload shown here. That is not automatically a 12.9× increase in total payment size — measure the full protocol, certificates, keys and transport overhead in your system.</p></div>
+        <div class="compare-foot"><span>WHY IT MATTERS</span><p>Plan for API payload limits, database columns, message queues, logs, latency and bandwidth. Cryptographic migration is also an engineering and operations project.</p></div>
+      </div>
+    </section>
+
+    <section class="blue-section">
+      <div class="shell kem-grid">
+        <div><div class="eyebrow">FIELD ENCRYPTION / FIPS 203</div><h2>Don't encrypt a<br>large message with<br>a tiny key.</h2><p>Use a Key Encapsulation Mechanism (KEM) to establish a shared secret, then use authenticated symmetric encryption for the actual data.</p><div class="kem-badge">ML-KEM-768 <span>+</span> AES-256-GCM</div></div>
+        <div class="kem-diagram">
+          <div class="kem-node"><span>01</span><b>ML-KEM-768</b><small>Encapsulate shared secret</small></div><div class="kem-connector"><i></i><span>shared secret</span><i></i></div>
+          <div class="kem-node node-yellow"><span>02</span><b>Key derivation</b><small>Derive an AES key (e.g. HKDF)</small></div><div class="kem-connector"><i></i><span>AES key</span><i></i></div>
+          <div class="kem-node node-green"><span>03</span><b>AES-256-GCM</b><small>Encrypt + authenticate field</small></div>
+          <div class="kem-caption">Ciphertext + nonce + authentication tag + KEM encapsulation</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section shell" id="architecture">
+      <div class="section-head">
+        <div><div class="eyebrow">DESIGN PATTERN / 04</div><h2>Keep crypto out<br><span class="muted">of business logic.</span></h2></div>
+        <p class="section-intro">The controller should express intent — sign this payment, protect this field. The provider owns the algorithm-specific implementation.</p>
+      </div>
+      <div class="architecture">
+        <div class="arch-box arch-controller"><span>APPLICATION</span><b>Payment Controller</b><code>provider.sign(payment)</code><code>provider.protect(accountNo)</code></div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-box arch-provider"><span>ABSTRACTION / INTERFACE</span><b>CryptoProvider</b><small>sign() · verify() · protect() · unprotect()</small></div>
+        <div class="arch-branches"><span></span><span></span><span></span></div>
+        <div class="arch-choices"><div><b>ClassicalProvider</b><small>RSA-PSS / RSA-OAEP</small></div><div><b>PQCProvider</b><small>ML-DSA / ML-KEM + AES-GCM</small></div><div><b>HybridProvider</b><small>Combined transition policy</small></div></div>
+        <div class="arch-config"><span>CONFIGURATION</span><code>CRYPTO_PROFILE=pqc</code><span class="config-arrow">→</span><b>Provider selected at startup</b></div>
+      </div>
+      <div class="code-explainer"><div><span class="mini-label">THE IMPORTANT DIFFERENCE</span><h3>Before: algorithm in every route.</h3><p>Controllers know which primitive to call. A migration touches many files and increases the chance of inconsistent changes.</p></div><div><span class="mini-label">AFTER: intent in every route.</span><h3>After: one provider seam.</h3><p>Controllers depend on a stable interface. Implementations and policy can evolve behind it, with explicit configuration and tests.</p></div></div>
+    </section>
+
+    <section class="section cbom-section" id="cbom">
+      <div class="shell">
+        <div class="section-head">
+          <div><div class="eyebrow">VISIBILITY / 05</div><h2>Know what crypto<br><span class="muted">you actually run.</span></h2></div>
+          <p class="section-intro">A Cryptographic Bill of Materials (CBOM) records cryptographic assets and their context. It helps teams discover, assess and plan migrations.</p>
+        </div>
+        <div class="cbom-layout">
+          <div class="cbom-copy"><div class="cbom-stamp">CycloneDX<br><b>1.6</b></div><h3>From invisible dependencies to an inventory.</h3><p>This example inventory describes the algorithms used in the selected profile. Download the JSON to inspect a simplified CycloneDX 1.6-style CBOM example.</p><ul><li><span class="check">✓</span> Algorithm and primitive type</li><li><span class="check">✓</span> Profile and component context</li><li><span class="check">✓</span> Migration visibility</li></ul><button class="btn btn-dark" id="downloadCbom">Download CBOM JSON <span>↓</span></button></div>
+          <div class="json-panel"><div class="json-top"><span><i></i><i></i><i></i></span><b id="jsonProfile">crypto-inventory-classical.json</b><button id="copyJson">Copy</button></div><pre id="jsonPreview" aria-label="CBOM JSON preview"></pre></div>
+        </div>
+        <p class="small-print">The downloadable file is a teaching example with a CycloneDX 1.6 document envelope and illustrative cryptographic inventory properties. Validate against your chosen CBOM schema/tooling before using it as a compliance artifact.</p>
+      </div>
+    </section>
+
+    <section class="final-cta shell">
+      <div><div class="eyebrow">YOUR NEXT STEP</div><h2>Make the migration<br><span class="muted">measurable.</span></h2><p>Start with discovery. Inventory the algorithms, classify sensitive data, define crypto-agility interfaces and test a staged migration plan.</p></div>
+      <a class="btn btn-dark" href="#journey">Explore the four upgrades <span>↗</span></a>
+    </section>
+  </main>
+
+  <footer class="footer"><a class="brand" href="#"><span class="brand-mark">C<span>.</span></span><span>CRYPTOSHIFT <small>INTERACTIVE LAB</small></span></a><span>Educational demo · Static website · Built for the quantum transition</span><a href="#main">Back to top ↑</a></footer>
+  <script src="app.js"></script>
+</body>
+</html>
