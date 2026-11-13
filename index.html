@@ -172,7 +172,10 @@
                 <span class="result-dot" id="resultDot"></span>
                 <span id="resultText">Legacy profile active</span>
               </div>
-              <button class="run-btn" id="runDemo">Run payment demo <span>→</span></button>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <a href="#agility-seam" class="btn btn-outline" style="border-color:#4f5666; color:#fff; font-size:10px; padding:8px 12px;">View Code Diffs <span>↗</span></a>
+                <button class="run-btn" id="runDemo">Run payment demo <span>→</span></button>
+              </div>
             </div>
             <div class="demo-output" id="demoOutput" aria-live="polite">Ready. Click "Run payment demo" to execute real cryptographic routines.</div>
           </div>
@@ -522,25 +525,39 @@
       </p>
     </section>
 
-    <!-- MODULE 06: APPLICATION ARCHITECTURE & AGILITY SEAM -->
+    <!-- MODULE 06: LIVE MIGRATION CODE DIFF & EXECUTION -->
     <section class="section shell" id="agility-seam">
       <div class="section-head">
         <div>
-          <span class="mod-num">MODULE 06</span>
-          <h2>Application Architecture & Crypto Agility.<br><span class="muted">Decoupling banking business logic from cryptographic primitives.</span></h2>
+          <span class="mod-num">MODULE 06 · LIVE CODE MIGRATION DIFF</span>
+          <h2>Shift from Classical to PQC in Code.<br><span class="muted">Inspect real code diffs and execute them live in the browser.</span></h2>
         </div>
-        <p class="section-intro">Inspect the TypeScript/JavaScript architecture seam. Payment controllers express pure transactional intent, while the configured CryptoProvider owns algorithm implementation and policy enforcement.</p>
+        <p class="section-intro">Hands-on code changes: see the exact lines deleted and added across signing, KEM encapsulation, agility seams, TLS ingress, and DB key rewrapping.</p>
       </div>
 
-      <div class="code-viewer-wrap">
-        <div class="code-tabs">
-          <button class="code-tab-btn active" data-tab="controller">PaymentController.ts</button>
-          <button class="code-tab-btn" data-tab="providerInterface">CryptoProvider.ts</button>
-          <button class="code-tab-btn" data-tab="classicalProvider">ClassicalProvider.ts</button>
-          <button class="code-tab-btn" data-tab="hybridProvider">HybridProvider.ts</button>
-          <button class="code-tab-btn" data-tab="pqcProvider">PQCProvider.ts</button>
+      <div class="code-diff-container">
+        <div class="diff-toolbar">
+          <div class="diff-file-tabs">
+            <button class="diff-tab active" data-file="signing">payment-signing.ts</button>
+            <button class="diff-tab" data-file="encryption">account-encryption.ts</button>
+            <button class="diff-tab" data-file="agility">payment-controller.ts</button>
+            <button class="diff-tab" data-file="tls">ingress-tls.yaml</button>
+            <button class="diff-tab" data-file="rewrap">database-kek-rewrap.ts</button>
+          </div>
+          <div class="diff-actions-group">
+            <button class="diff-mode-btn active" data-mode="diff">Unified Diff (+/-)</button>
+            <button class="diff-mode-btn" data-mode="pqc">PQC Code</button>
+            <button class="diff-mode-btn" data-mode="classical">Classical Code</button>
+          </div>
         </div>
-        <pre class="code-content-block" id="codeBlock">// Code will load here</pre>
+
+        <pre class="diff-code-area" id="diffCodeArea" aria-label="Interactive Code Diff View"></pre>
+
+        <div class="diff-runner-bar">
+          <div><span class="impact-badge badge-green">LIVE RUNTIME</span> <span id="diffFileLabel" style="color:#fff; margin-left:8px;">payment-signing.ts</span></div>
+          <button class="btn btn-dark" id="btnExecuteDiffSnippet" style="padding:6px 14px; font-size:10px;">Run This Snippet Now ⚡</button>
+        </div>
+        <div class="diff-run-output" id="diffRunOutput" aria-live="polite"></div>
       </div>
     </section>
 

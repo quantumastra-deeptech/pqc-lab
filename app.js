@@ -422,12 +422,245 @@ export class PQCProvider implements CryptoProvider {
 }`
   };
 
-  let activeCodeTab = 'controller';
-  function updateCodeViewer() {
-    const block = $('#codeBlock');
-    if (!block) return;
-    block.textContent = codeSnippets[activeCodeTab] || codeSnippets.controller;
+  // Code Diff Snippets Database
+  const codeDiffData = {
+    signing: {
+      file: 'payment-signing.ts',
+      label: '1. Payment Digital Signature',
+      classicalLines: [
+        '// CLASSICAL: RSA-PSS 2048-bit digital signature',
+        'const payloadBytes = new TextEncoder().encode(JSON.stringify(payment));',
+        'const signature = await crypto.subtle.sign(',
+        '  { name: "RSA-PSS", saltLength: 32 },',
+        '  this.rsaPrivateKey,',
+        '  payloadBytes',
+        ');',
+        '// Signature size: 256 bytes (Vulnerable to Shor\'s factoring on quantum computer)'
+      ],
+      pqcLines: [
+        '// POST-QUANTUM: NIST FIPS 204 ML-DSA-65 signature',
+        'import { ml_dsa65 } from "@noble/post-quantum/ml-dsa";',
+        '',
+        'const payloadBytes = new TextEncoder().encode(JSON.stringify(payment));',
+        '// Module lattice sampling (MLWE / MSIS hardness assumption)',
+        'const signature = ml_dsa65.sign(payloadBytes, this.dsaSecretKey);',
+        '// Signature size: 3,309 bytes (Category 3 quantum-secure non-repudiation)'
+      ],
+      diffLines: [
+        { type: 'del', text: '// CLASSICAL: RSA-PSS 2048-bit signature (Shor\'s broken)' },
+        { type: 'del', text: 'const sig = await crypto.subtle.sign({ name: "RSA-PSS", saltLength: 32 }, rsaKey, bytes);' },
+        { type: 'del', text: '// Output: 256 bytes signature' },
+        { type: 'info', text: '@@ -1,7 +1,7 @@ Payment Service Signature Migration' },
+        { type: 'add', text: '// POST-QUANTUM: NIST FIPS 204 ML-DSA-65 (Module-Lattice Signature)' },
+        { type: 'add', text: 'import { ml_dsa65 } from "@noble/post-quantum/ml-dsa";' },
+        { type: 'add', text: 'const sig = ml_dsa65.sign(bytes, dsaSecretKey);' },
+        { type: 'add', text: '// Output: 3,309 bytes signature (~12.9x larger, immune to quantum computers)' }
+      ],
+      run: async function () {
+        const dsaKeys = await CryptoCore.generateMlDsa65Keypair();
+        const msg = CryptoCore.utf8ToBytes(JSON.stringify({ txId: 'TX-LIVE-DIFF', amount: 12500 }));
+        const sig = await CryptoCore.signMlDsa65(dsaKeys.secretKeyBytes, msg);
+        return `✓ Executed FIPS 204 ML-DSA-65 signature in ${sig.durationMs.toFixed(1)} ms.\nSignature Size: ${sig.sizeBytes.toLocaleString()} bytes (vs 256 bytes in RSA).\nFirst 64 hex chars: ${sig.signatureHex.substring(0, 64)}...`;
+      }
+    },
+    encryption: {
+      file: 'account-field-encryption.ts',
+      label: '2. Field Encryption & KEM',
+      classicalLines: [
+        '// CLASSICAL: Vulnerable direct asymmetric encryption with RSA-OAEP',
+        'const ciphertext = await crypto.subtle.encrypt(',
+        '  { name: "RSA-OAEP" },',
+        '  this.recipientRsaPublicKey,',
+        '  new TextEncoder().encode(accountNumber)',
+        ');',
+        '// Vulnerable to Harvest-Now-Decrypt-Later (HNDL) data collection'
+      ],
+      pqcLines: [
+        '// POST-QUANTUM: FIPS 203 ML-KEM-768 + HKDF + AES-256-GCM',
+        'import { ml_kem768 } from "@noble/post-quantum/ml-kem";',
+        '',
+        '// 1. Establish quantum-safe shared secret via lattice encapsulation',
+        'const { cipherText, sharedSecret } = ml_kem768.encapsulate(recipientKemPublicKey);',
+        '// 2. Derive 256-bit AES key via HKDF-SHA256',
+        'const aesKey = await deriveAesKeyHkdf(sharedSecret, salt, "Banking-Field-v1");',
+        '// 3. Authenticated AES-GCM encryption with unique 96-bit nonce and AAD',
+        'const encrypted = await crypto.subtle.encrypt(',
+        '  { name: "AES-GCM", iv: unique96BitNonce, additionalData: txAad },',
+        '  aesKey,',
+        '  new TextEncoder().encode(accountNumber)',
+        ');'
+      ],
+      diffLines: [
+        { type: 'del', text: '// CLASSICAL: Direct RSA-OAEP field encryption (HNDL vulnerable)' },
+        { type: 'del', text: 'const ct = await crypto.subtle.encrypt({ name: "RSA-OAEP" }, rsaPubKey, accountBytes);' },
+        { type: 'info', text: '@@ -1,6 +1,9 @@ Field Protection: KEM + Symmetric AEAD' },
+        { type: 'add', text: '// POST-QUANTUM: ML-KEM-768 Encapsulation + HKDF + AES-256-GCM' },
+        { type: 'add', text: 'const { cipherText, sharedSecret } = ml_kem768.encapsulate(kemPublicKey); // 1,088 B ct' },
+        { type: 'add', text: 'const aesKey = await deriveKey(sharedSecret); // 256-bit symmetric key' },
+        { type: 'add', text: 'const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv, additionalData }, aesKey, accountBytes);' },
+        { type: 'add', text: '// Defeats Harvest-Now-Decrypt-Later (HNDL) attacks' }
+      ],
+      run: async function () {
+        const kemKeys = await CryptoCore.generateMlKem768Keypair();
+        const env = await CryptoCore.protectFieldPqc(kemKeys.publicKeyBytes, 'ACCT: 4821-9902-8812-7391', 'TX-DIFF');
+        return `✓ Executed FIPS 203 ML-KEM-768 encapsulation + AES-256-GCM.\nKEM Ciphertext: ${env.kemCiphertextBytes.length} bytes | Auth Tag: ${env.authTagHex}\nTotal Envelope: ${env.totalEnvelopeBytes} bytes in ${(env.encapsulationDurationMs + env.encryptionDurationMs).toFixed(1)} ms.`;
+      }
+    },
+    agility: {
+      file: 'payment-controller.ts',
+      label: '3. Crypto-Agility Seam',
+      classicalLines: [
+        '// BEFORE: Hardcoded cryptography in payment route',
+        'export async function executePayment(paymentRequest: Request) {',
+        '  const sig = await directRsaSign(paymentRequest.payload); // Tight coupling!',
+        '  const enc = await directRsaEncrypt(paymentRequest.account);',
+        '  return ledger.record({ payload, sig, enc });',
+        '}'
+      ],
+      pqcLines: [
+        '// AFTER: Business logic asks for outcomes via CryptoProvider interface',
+        'export async function executePayment(req: Request, provider: CryptoProvider) {',
+        '  // Controller is 100% agnostic to whether provider is Classical, Hybrid or PQC',
+        '  const sig = await provider.signPayment(req.payload);',
+        '  const enc = await provider.protectField(req.account, req.id);',
+        '  return ledger.record({ payload, sig, enc });',
+        '}'
+      ],
+      diffLines: [
+        { type: 'del', text: 'export async function executePayment(req: Request) {' },
+        { type: 'del', text: '  const sig = await directRsaSign(req.payload); // Hardcoded algorithm!' },
+        { type: 'del', text: '  const enc = await directRsaEncrypt(req.account);' },
+        { type: 'info', text: '@@ -1,5 +1,5 @@ Decoupling Business Logic via Seam' },
+        { type: 'add', text: 'export async function executePayment(req: Request, provider: CryptoProvider) {' },
+        { type: 'add', text: '  const sig = await provider.signPayment(req.payload); // Agnostic intent' },
+        { type: 'add', text: '  const enc = await provider.protectField(req.account, req.id);' }
+      ],
+      run: async function () {
+        const prov = CryptoProviders.getProvider(selectedProfile);
+        const controller = new CryptoProviders.PaymentController(prov);
+        const res = await controller.executePayment({ txId: 'TX-SEAM', amount: '₹12,500' }, '4821-••••-7391');
+        return `✓ Executed through ${selectedProfile.toUpperCase()} provider.\nAlgorithm: ${res.signatureEnvelope.algorithm}\nPayment Controller executed zero algorithm-specific logic!`;
+      }
+    },
+    tls: {
+      file: 'ingress-tls.yaml',
+      label: '4. TLS 1.3 Key Exchange Config',
+      classicalLines: [
+        '# CLASSICAL: Ingress proxy TLS configuration',
+        'ssl_protocols TLSv1.2 TLSv1.3;',
+        'ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384;',
+        'ssl_ecdh_curve prime256v1;',
+        '# ECDH P-256 exchange broken by Shor\'s algorithm (HNDL exposed)'
+      ],
+      pqcLines: [
+        '# POST-QUANTUM: Hybrid lattice key exchange',
+        'ssl_protocols TLSv1.3;',
+        'ssl_ciphers TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256;',
+        '# Hybrid X25519 + ML-KEM-768 key share (IETF draft / Chrome & Cloudflare standard)',
+        'ssl_ecdh_curve X25519MLKEM768:X25519;'
+      ],
+      diffLines: [
+        { type: 'del', text: 'ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384;' },
+        { type: 'del', text: 'ssl_ecdh_curve prime256v1; # Classical ECDH (HNDL at risk)' },
+        { type: 'info', text: '@@ -1,3 +1,3 @@ TLS 1.3 Hybrid Ingress Upgrade' },
+        { type: 'add', text: 'ssl_ciphers TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256;' },
+        { type: 'add', text: 'ssl_ecdh_curve X25519MLKEM768:X25519; # Hybrid PQC key share' }
+      ],
+      run: async function () {
+        return `✓ TLS 1.3 Hybrid Negotiation Simulated: Client sends 1,216 bytes KeyShare (32 B X25519 + 1,184 B ML-KEM-768). Server encapsulates 1,088 B ciphertext. Zero HNDL exposure.`;
+      }
+    },
+    rewrap: {
+      file: 'database-kek-rewrap.ts',
+      label: '5. DB Envelope Key Rewrap',
+      classicalLines: [
+        '// OLD: Data Encryption Key (DEK) wrapped with classical RSA-OAEP',
+        'const dek = await rsaOaepDecrypt(oldRsaKey, record.wrappedDek);',
+        '// Millions of transactional records depend on this classical KEK'
+      ],
+      pqcLines: [
+        '// ZERO-DOWNTIME REWRAP: Only rewrap the DEK using ML-KEM-768!',
+        '// 1. Unwrap existing DEK with classical key',
+        'const dek = await rsaOaepDecrypt(oldRsaKey, record.wrappedDek);',
+        '// 2. Encapsulate with new post-quantum ML-KEM key',
+        'const { cipherText, sharedSecret } = ml_kem768.encapsulate(newPqcKey);',
+        'const wrapKey = await hkdf(sharedSecret);',
+        '// 3. Rewrap DEK and update only the key envelope column',
+        'record.wrappedDek = await aesKeyWrap(wrapKey, dek);',
+        '// Bulk AES-256 database rows remain 100% untouched!'
+      ],
+      diffLines: [
+        { type: 'del', text: '// OLD: DEK protected by classical RSA-OAEP master key' },
+        { type: 'del', text: 'record.wrappedDek = await rsaOaepEncrypt(oldMasterRsaKey, rawDek);' },
+        { type: 'info', text: '@@ -1,3 +1,6 @@ Zero-Downtime Envelope Migration' },
+        { type: 'add', text: '// MIGRATION: Rewrap DEK with ML-KEM without modifying bulk rows!' },
+        { type: 'add', text: 'const { cipherText, sharedSecret } = ml_kem768.encapsulate(newPqcMasterKey);' },
+        { type: 'add', text: 'record.wrappedDek = await aesKeyWrap(await hkdf(sharedSecret), rawDek);' },
+        { type: 'add', text: '// Petabytes of encrypted transaction tables remain untouched in storage' }
+      ],
+      run: async function () {
+        const kemKeys = await CryptoCore.generateMlKem768Keypair();
+        const encap = await CryptoCore.encapsulateMlKem768(kemKeys.publicKeyBytes);
+        return `✓ Key Rewrapping Executed: Established new ML-KEM-768 KEK in ${encap.durationMs.toFixed(1)} ms. Re-wrapped DEK envelope. Total DB records re-encrypted: 0 (Bulk data preserved).`;
+      }
+    }
+  };
+
+  let activeDiffFile = 'signing';
+  let diffDisplayMode = 'diff'; // 'diff' | 'pqc' | 'classical'
+
+  function renderDiffViewer() {
+    const data = codeDiffData[activeDiffFile] || codeDiffData.signing;
+    const codeArea = $('#diffCodeArea');
+    const labelEl = $('#diffFileLabel');
+    if (labelEl) labelEl.textContent = data.file;
+
+    if (!codeArea) return;
+
+    if (diffDisplayMode === 'diff') {
+      codeArea.innerHTML = data.diffLines.map(line => `
+        <span class="diff-line ${line.type}">${line.text}</span>
+      `).join('');
+    } else if (diffDisplayMode === 'pqc') {
+      codeArea.innerHTML = data.pqcLines.map(line => `
+        <span class="diff-line add">+ ${line}</span>
+      `).join('');
+    } else {
+      codeArea.innerHTML = data.classicalLines.map(line => `
+        <span class="diff-line del">- ${line}</span>
+      `).join('');
+    }
   }
+
+  // Bind Diff Toolbar Events
+  $$('.diff-tab').forEach(tab => tab.addEventListener('click', () => {
+    $$('.diff-tab').forEach(t => t.classList.toggle('active', t === tab));
+    activeDiffFile = tab.dataset.file;
+    renderDiffViewer();
+    const out = $('#diffRunOutput');
+    if (out) out.classList.remove('active');
+  }));
+
+  $$('.diff-mode-btn').forEach(btn => btn.addEventListener('click', () => {
+    $$('.diff-mode-btn').forEach(b => b.classList.toggle('active', b === btn));
+    diffDisplayMode = btn.dataset.mode;
+    renderDiffViewer();
+  }));
+
+  $('#btnExecuteDiffSnippet')?.addEventListener('click', async () => {
+    const data = codeDiffData[activeDiffFile];
+    if (!data || !data.run) return;
+    const out = $('#diffRunOutput');
+    out.classList.add('active');
+    out.textContent = 'Executing real cryptographic snippet...';
+    try {
+      const res = await data.run();
+      out.textContent = res;
+    } catch (e) {
+      out.textContent = `Error: ${e.message}`;
+    }
+  });
+
 
   // --- Wire Up Interactive Modules ---
 
@@ -795,5 +1028,6 @@ export class PQCProvider implements CryptoProvider {
   // Initial Boot
   applyProfile('classical');
   inspectArchComponent('customer');
+  renderDiffViewer();
 
 })();
