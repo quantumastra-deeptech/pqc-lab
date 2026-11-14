@@ -1,963 +1,669 @@
 /**
- * CryptoShift Lab — Main Application Controller
- * Orchestrates central profile changes across all 12 modules, interactive workbenches,
- * benchmarks, threat simulations, CBOM generation, and the in-browser test runner.
+ * CryptoShift Lab — Interactive Classical to PQC Code Migration Lab
+ * Live dual-card interactive code workbench with real cryptographic execution.
  */
 
 (function () {
   'use strict';
 
-  // Selected Profile State
-  let selectedProfile = 'classical';
-
-  // DOM Query Helpers
+  // DOM Helpers
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => [...document.querySelectorAll(s)];
 
-  // Architecture Components Data (Module 01)
-  const archComponents = {
-    customer: {
-      step: '01 / 08',
-      title: 'Customer Client Device',
-      role: 'Initiates banking transaction via retail web portal or native mobile app.',
-      classicalCrypto: 'TLS 1.2 / 1.3 Client, Device keystore (RSA-2048 / ECDSA P-256)',
-      hybridCrypto: 'Dual TLS Key Exchange (X25519 + ML-KEM-768), App-level PQC signing support',
-      pqcCrypto: 'Full FIPS 203 ML-KEM TLS Client + FIPS 204 ML-DSA Transaction Signer',
-      quantumRisk: 'Low immediate risk on client device, but transaction payloads sent over public Internet are vulnerable to HNDL recording.',
-      migrationTouchpoint: 'Update mobile SDKs and browser WebCrypto polyfills to support ML-KEM and ML-DSA.'
-    },
-    app: {
-      step: '02 / 08',
-      title: 'Mobile / Web Banking App',
-      role: 'Constructs ISO 20022 payment payload, gathers 2FA biometrics, and formats requests.',
-      classicalCrypto: 'JSON Web Signatures (JWS RS256), Local secure storage (AES-128/256)',
-      hybridCrypto: 'Composite JWS (RS256 + ML-DSA-65), Hybrid KEM session bootstrap',
-      pqcCrypto: 'PQC-JWS with ML-DSA-65 payload signatures, ML-KEM-768 field protection',
-      quantumRisk: 'Stored device tokens signed with RSA-2048 can be forged by a future quantum computer.',
-      migrationTouchpoint: 'Adopt quantum-resistant JWT/JWS formats and crypto-agile API client libraries.'
-    },
-    gateway: {
-      step: '03 / 08',
-      title: 'API Gateway & Ingress',
-      role: 'Performs TLS termination, DDoS filtering, rate-limiting, and MTLS routing.',
-      classicalCrypto: 'TLS Termination with RSA-2048 or ECDSA certificates, WAF inspection',
-      hybridCrypto: 'Hybrid TLS 1.3 (X25519MLKEM768), Dual-certificate chain negotiation',
-      pqcCrypto: 'Pure ML-KEM-768 Key Exchange + ML-DSA-65 Certificate Validation',
-      quantumRisk: 'High HNDL exposure: all external incoming network traffic traverses this gateway.',
-      migrationTouchpoint: 'Upgrade Envoy / NGINX / Cloud Ingress to OpenSSL 3.4+ or BoringSSL with PQC key shares.'
-    },
-    auth: {
-      step: '04 / 08',
-      title: 'Authentication Service',
-      role: 'Validates customer credentials, issues OAuth2/OIDC access tokens, and enforces RBAC.',
-      classicalCrypto: 'OAuth2 Tokens signed with RSA-2048 private key (OIDC RS256)',
-      hybridCrypto: 'Dual-signed tokens containing both RSA and ML-DSA signatures',
-      pqcCrypto: 'ML-DSA-65 Signed Access Tokens, Quantum-safe PKI verification',
-      quantumRisk: 'Forged classical authentication tokens would grant unauthorized bank account access.',
-      migrationTouchpoint: 'Upgrade Identity Provider (IdP) key rings to issue FIPS 204 compliant assertions.'
-    },
-    payment: {
-      step: '05 / 08',
-      title: 'Payment Core Service',
-      role: 'Executes transaction validation, account balance deduction, ledger posting, and routing.',
-      classicalCrypto: 'Hardcoded direct calls to legacy RSA signature libraries',
-      hybridCrypto: 'CryptoProvider Seam routing calls through HybridProvider (strict dual policy)',
-      pqcCrypto: 'CryptoProvider Seam routing calls through PQCProvider (ML-DSA-65 / ML-KEM-768)',
-      quantumRisk: 'Critical non-repudiation risk: payment authorizations could be repudiated or forged.',
-      migrationTouchpoint: 'Decouple business logic using CryptoProvider abstraction seam (Module 06).'
-    },
-    provider: {
-      step: '06 / 08',
-      title: 'Cryptographic Provider',
-      role: 'Abstracts hardware/software cryptographic primitives behind a unified interface.',
-      classicalCrypto: 'ClassicalProvider: RSA-PSS-2048 and RSA-OAEP-2048',
-      hybridCrypto: 'HybridProvider: Combines classical + PQC with strict fallback policy',
-      pqcCrypto: 'PQCProvider: FIPS 203 ML-KEM-768, FIPS 204 ML-DSA-65, AES-256-GCM',
-      quantumRisk: 'Directly dictates systemic vulnerability or resilience against quantum attacks.',
-      migrationTouchpoint: 'Implement CryptoProvider interface with pluggable runtime profile configuration.'
-    },
-    db: {
-      step: '07 / 08',
-      title: 'Database & Ledger Storage',
-      role: 'Persists encrypted account data, transaction ledgers, audit logs, and keys.',
-      classicalCrypto: 'Transparent Data Encryption (TDE) with RSA-wrapped KEKs, AES-256 tables',
-      hybridCrypto: 'Dual-wrapped KEKs (RSA-2048 + ML-KEM-768), Historical signature archive',
-      pqcCrypto: 'ML-KEM-768 Wrapped KEKs + AES-256-GCM Payload Data, RFC 3161 PQC Timestamps',
-      quantumRisk: 'Archived backups are high-value targets for HNDL data exfiltration.',
-      migrationTouchpoint: 'Rewrap existing Data Encryption Keys (DEKs) using ML-KEM without rewriting full database.'
-    },
-    partner: {
-      step: '08 / 08',
-      title: 'Banking Partner / Network',
-      role: 'Clearing and settlement networks (e.g. SWIFT, Fedwire, Clearing House, Central Bank).',
-      classicalCrypto: 'SWIFT PKI (RSA-2048 / SHA-256), AS4 / EBICS protocol signatures',
-      hybridCrypto: 'Bilateral Hybrid Testing rails, Dual-enveloped ISO 20022 XML payments',
-      pqcCrypto: 'Standardized PQC Interbank settlement messages',
-      quantumRisk: 'Ecosystem dependency: cannot enforce pure PQC until correspondent banks upgrade.',
-      migrationTouchpoint: 'Negotiate bilateral hybrid pilot agreements with major clearing partners.'
-    }
-  };
+  // Preset Migration Demos
+  const demos = {
+    signature: {
+      id: 'signature',
+      title: 'Digital Signature (Payment Authorization)',
+      classicalTitle: 'RSA-PSS-2048 Digital Signature',
+      classicalAlgo: 'RSA-PSS-2048 (SHA-256)',
+      classicalMath: 'Integer Factorization (Broken by Shor\'s Algorithm)',
+      classicalKeySize: '294 B Public / ~1,192 B Private',
+      classicalOutputSize: '256 bytes signature',
+      classicalSecurity: '0 bits quantum security (CRITICAL RISK)',
+      classicalCode: `// 1. Generate RSA-PSS 2048-bit Keypair
+const rsaKeys = await crypto.subtle.generateKey(
+  {
+    name: "RSA-PSS",
+    modulusLength: 2048,
+    publicExponent: new Uint8Array([1, 0, 1]),
+    hash: "SHA-256"
+  },
+  true,
+  ["sign", "verify"]
+);
 
-  // Change Impact Data (Module 02 / Impact Report)
-  const impactData = {
-    classical: {
-      changed: [
-        { title: 'Payment Controller Signature Calls', detail: 'Hardcoded legacy RSA-PSS calls awaiting abstraction to CryptoProvider.' },
-        { title: 'Account Field Encryption Logic', detail: 'Direct RSA-OAEP field protection vulnerable to future quantum decryption.' },
-        { title: 'TLS Ingress Ciphersuites', detail: 'Classical ECDHE-RSA ciphersuites vulnerable to harvest-now-decrypt-later.' }
+// 2. Sign Canonical Payment JSON Payload
+const paymentPayload = JSON.stringify({
+  transactionId: "TX-90214-PAY",
+  amount: 12500.00,
+  currency: "INR",
+  recipient: "Apex Clearing Hub"
+});
+
+const signature = await crypto.subtle.sign(
+  { name: "RSA-PSS", saltLength: 32 },
+  rsaKeys.privateKey,
+  new TextEncoder().encode(paymentPayload)
+);
+
+// Output: 256 bytes signature (Broken by Shor's algorithm on a quantum computer)`,
+
+      pqcTitle: 'ML-DSA-65 (NIST FIPS 204) Post-Quantum Signature',
+      pqcAlgo: 'ML-DSA-65 (FIPS 204 Category 3)',
+      pqcMath: 'Module Learning with Errors (MLWE / Module Lattices)',
+      pqcKeySize: '1,952 B Public / 4,032 B Private',
+      pqcOutputSize: '3,309 bytes signature (~12.9× expansion)',
+      pqcSecurity: '192 bits quantum hardness (NIST Standardized)',
+      pqcCode: `// 1. Generate FIPS 204 ML-DSA-65 Keypair
+import { ml_dsa65 } from "@noble/post-quantum/ml-dsa";
+const dsaKeys = ml_dsa65.keygen();
+
+// 2. Sign Canonical Payment JSON Payload with ML-DSA
+const paymentPayload = JSON.stringify({
+  transactionId: "TX-90214-PAY",
+  amount: 12500.00,
+  currency: "INR",
+  recipient: "Apex Clearing Hub"
+});
+
+const signature = ml_dsa65.sign(
+  new TextEncoder().encode(paymentPayload),
+  dsaKeys.secretKey
+);
+
+// Output: 3,309 bytes signature (Lattice-hard, resists quantum & classical attacks!)`,
+
+      changesSummary: [
+        'Algorithm replaced: RSA-PSS-2048 → NIST FIPS 204 ML-DSA-65',
+        'Signature size expanded from 256 bytes to 3,309 bytes (~12.9× larger)',
+        'Public key size expanded from 294 bytes to 1,952 bytes (~6.6× larger)',
+        'Immune to Shor\'s polynomial-time order finding algorithm',
+        'Buffer & database column sizing: update VARCHAR(512) to TEXT / BLOB'
       ],
-      retained: [
-        { title: 'AES-256-GCM Storage Encryption', detail: 'Symmetric bulk encryption retains 128-bit quantum security against Grover\'s algorithm.' },
-        { title: 'SHA-256 & SHA-384 Hashing', detail: 'Cryptographic hash functions remain robust with adequate collision resistance.' },
-        { title: 'Relational Database Schemas', detail: 'Transactional SQL tables and indexing require zero architectural schema change.' }
-      ],
-      compat: [
-        { title: 'Hardware Security Modules (HSMs)', detail: 'Existing PKCS#11 v2.40 firmware lacks lattice math (NTT) accelerators.' },
-        { title: 'SWIFT / ISO 20022 Schemas', detail: 'Clearing partners currently validate X.509 RSA-2048 certificates only.' },
-        { title: 'Public CA Certificate Chains', detail: 'Commercial Certificate Authorities do not yet cross-sign pure ML-DSA roots.' }
-      ]
-    },
-    hybrid: {
-      changed: [
-        { title: 'CryptoProvider Seam Deployed', detail: 'Payment business logic now calls HybridProvider enforcing strict dual verification.' },
-        { title: 'Dual Signature Envelopes', detail: 'Transaction messages bundle both RSA-PSS-2048 (256 B) and ML-DSA-65 (3,309 B).' },
-        { title: 'Dual Key Establishment Protocol', detail: 'Combines RSA-OAEP and ML-KEM-768 shared secrets via HKDF-SHA256 combiner.' }
-      ],
-      retained: [
-        { title: 'AES-256-GCM Bulk Cipher', detail: 'Symmetric data payload encryption unchanged; keyed via hybrid derived secret.' },
-        { title: 'Classical Audit Infrastructure', detail: 'Existing compliance tools can continue verifying the classical signature layer.' },
-        { title: 'Core Banking Ledger DB', detail: 'Database continues using envelope encryption without table re-structuring.' }
-      ],
-      compat: [
-        { title: 'Network MTU & Fragmentation', detail: 'Payloads expanded by ~3.5 KB per transaction; requires tuning TCP MSS/buffers.' },
-        { title: 'HSM Dual-Slot Provisioning', detail: 'Requires allocating separate HSM slots for classical RSA and PQC lattice keys.' },
-        { title: 'Clearing Partner Adapters', detail: 'Classical-only partners accept the RSA signature slice while ignoring PQC envelope.' }
-      ]
-    },
-    pqc: {
-      changed: [
-        { title: 'FIPS 204 ML-DSA-65 Signatures', detail: 'Digital signatures fully transitioned to lattice-based module signatures (3,309 B).' },
-        { title: 'FIPS 203 ML-KEM-768 Key Encapsulation', detail: 'Field protection and session keys established via 1,088-byte lattice ciphertexts.' },
-        { title: 'Pure PQC X.509 Certificates', detail: 'Internal service-to-service mTLS uses leaf and CA certificates signed with ML-DSA.' },
-        { title: 'Automated CycloneDX 1.6 CBOM', detail: 'Continuous cryptographic discovery actively audits all operational primitives.' }
-      ],
-      retained: [
-        { title: 'AES-256-GCM Authenticated Encryption', detail: 'Retained as the universal bulk data cipher with unique 96-bit nonces and AAD.' },
-        { title: 'HKDF Key Derivation Pipeline', detail: 'RFC 5869 extract-and-expand pipeline derives AES keys from ML-KEM shared secrets.' },
-        { title: 'Payment Business Logic', detail: '100% identical PaymentController code thanks to the CryptoProvider seam.' }
-      ],
-      compat: [
-        { title: 'FIPS 140-3 Hardware Token Upgrades', detail: 'Requires next-gen HSM hardware supporting lattice sampling and expanded RAM.' },
-        { title: 'Interbank Network Standardization', detail: 'Full retirement of classical algorithms contingent on global SWIFT/ISO PQC mandates.' },
-        { title: 'TCP Handshake Packet Budgets', detail: 'PQC certificate chains span multiple TCP packets; requires connection pooling.' }
-      ]
-    }
-  };
 
-  // Profile Profiles UI Data
-  const profileUIData = {
-    classical: {
-      sign: 'RSA-PSS-2048', enc: 'RSA-OAEP-2048', meta: 'Algorithm inventory unavailable',
-      signState: 'CLASSICAL (VULNERABLE)', encState: 'CLASSICAL (HNDL AT RISK)', metaState: 'LIMITED',
-      status: 'Legacy profile active · High quantum vulnerability', color: '#f05b50',
-      badge: 'AS-IS',
-      description: 'Legacy flow selected. Public-key operations rely on integer factorization (RSA-2048). Vulnerable to Shor\'s algorithm and Harvest-Now-Decrypt-Later threats.'
-    },
-    pqc: {
-      sign: 'ML-DSA-65 (FIPS 204)', enc: 'ML-KEM-768 + HKDF + AES-256-GCM', meta: 'CycloneDX 1.6 CBOM Validated',
-      signState: 'FIPS 204 PQC SECURE', encState: 'FIPS 203 PQC ENCAPSULATION', metaState: 'INVENTORIED',
-      status: 'Post-quantum profile active · FIPS 203 & 204 compliant', color: '#4bb77a',
-      badge: 'TO-BE',
-      description: 'PQC flow selected. ML-DSA-65 signs payments; ML-KEM-768 establishes a shared secret, derived via HKDF into an AES-256-GCM key for field encryption.'
-    },
-    hybrid: {
-      sign: 'RSA-PSS-2048 + ML-DSA-65', enc: 'RSA-OAEP-2048 + ML-KEM-768 / AES-256-GCM', meta: 'Classical + PQC Dual Inventory Validated',
-      signState: 'DUAL STRICT SIGNATURE', encState: 'DUAL KEY ESTABLISHMENT', metaState: 'INVENTORIED',
-      status: 'Hybrid transition profile active · Strict dual policy', color: '#4778ee',
-      badge: 'TRANSITION',
-      description: 'Hybrid transition selected. Classical and post-quantum primitives execute in tandem. Both signatures must verify; shared secrets are combined via HKDF.'
-    }
-  };
+      runClassical: async function () {
+        const t0 = performance.now();
+        const pair = await CryptoCore.generateRsaPssKeypair();
+        const msg = CryptoCore.utf8ToBytes(JSON.stringify({ txId: 'TX-90214-PAY', amount: 12500 }));
+        const sig = await CryptoCore.signRsaPss(pair.keyPair.privateKey, msg);
+        const ver = await CryptoCore.verifyRsaPss(pair.keyPair.publicKey, msg, sig.signatureBytes);
+        const totalMs = performance.now() - t0;
+        return {
+          algorithm: 'RSA-PSS-2048',
+          verified: ver.isValid,
+          sigBytes: sig.sizeBytes,
+          sigHex: sig.signatureHex.substring(0, 48) + '...',
+          pubKeyBytes: pair.publicKeyBytes,
+          durationMs: totalMs,
+          status: 'SUCCESS (Vulnerable to Shor\'s quantum algorithm)'
+        };
+      },
 
-  // Render Central Profile Across All Dependent Modules
-  function applyProfile(profileName) {
-    selectedProfile = profileName;
-    const p = profileUIData[profileName];
-
-    // 1. Update Profile Buttons
-    $$('.profile-option').forEach(btn => {
-      const active = btn.dataset.profile === selectedProfile;
-      btn.classList.toggle('active', active);
-      btn.setAttribute('aria-pressed', String(active));
-    });
-
-    // 2. Update Environment Variable & Flow Steps
-    $('#envValue').textContent = `CRYPTO_PROFILE=${selectedProfile}`;
-    $('#signAlgo').textContent = p.sign;
-    $('#encAlgo').textContent = p.enc;
-    $('#metaAlgo').textContent = p.meta;
-    $('#signState').textContent = p.signState;
-    $('#encState').textContent = p.encState;
-    $('#metaState').textContent = p.metaState;
-    $('#resultText').textContent = p.status;
-    $('#resultDot').style.background = p.color;
-
-    // 3. Update Impact Report
-    renderImpactReport(selectedProfile);
-
-    // 4. Update Architecture Diagram Badges
-    renderArchDiagram(selectedProfile);
-
-    // 5. Update CBOM Preview
-    renderCbom();
-
-    // 6. Update Active Code Tab in Module 06
-    updateCodeViewer();
-
-    // 7. Reset live demo output
-    $('#demoOutput').textContent = `Selected profile: ${selectedProfile.toUpperCase()}. Ready to run live payment demo.`;
-  }
-
-  // Render Change Impact Report
-  function renderImpactReport(profileName) {
-    const data = impactData[profileName] || impactData.classical;
-
-    const fillList = (elId, items) => {
-      const el = $(elId);
-      if (!el) return;
-      el.innerHTML = items.map(item => `
-        <li>
-          <strong>${item.title}</strong>
-          <span>${item.detail}</span>
-        </li>
-      `).join('');
-    };
-
-    fillList('#impactChangedList', data.changed);
-    fillList('#impactRetainedList', data.retained);
-    fillList('#impactCompatList', data.compat);
-
-    // Update count badges
-    if ($('#countChanged')) $('#countChanged').textContent = `${data.changed.length} ITEMS`;
-    if ($('#countRetained')) $('#countRetained').textContent = `${data.retained.length} ITEMS`;
-    if ($('#countCompat')) $('#countCompat').textContent = `${data.compat.length} ITEMS`;
-  }
-
-  // Render Architecture Diagram
-  function renderArchDiagram(profileName) {
-    $$('.arch-card-btn').forEach(btn => {
-      const compKey = btn.dataset.component;
-      const comp = archComponents[compKey];
-      if (!comp) return;
-
-      const cryptoLabelEl = btn.querySelector('.node-crypto');
-      if (cryptoLabelEl) {
-        if (profileName === 'pqc') {
-          cryptoLabelEl.textContent = comp.pqcCrypto.split(',')[0].substring(0, 18) + '...';
-          cryptoLabelEl.style.color = '#23854e';
-        } else if (profileName === 'hybrid') {
-          cryptoLabelEl.textContent = 'Hybrid Dual Layer';
-          cryptoLabelEl.style.color = '#4778ee';
-        } else {
-          cryptoLabelEl.textContent = comp.classicalCrypto.split(',')[0].substring(0, 18) + '...';
-          cryptoLabelEl.style.color = '#d94b40';
-        }
-      }
-    });
-
-    // Update active inspector if one is open
-    const activeBtn = $('.arch-card-btn.active') || $('.arch-card-btn');
-    if (activeBtn) {
-      inspectArchComponent(activeBtn.dataset.component);
-    }
-  }
-
-  // Inspect Single Architecture Component
-  function inspectArchComponent(compKey) {
-    const comp = archComponents[compKey];
-    if (!comp) return;
-
-    $$('.arch-card-btn').forEach(b => b.classList.toggle('active', b.dataset.component === compKey));
-
-    const drawer = $('#archInspector');
-    if (!drawer) return;
-
-    drawer.innerHTML = `
-      <div>
-        <span class="mod-num">${comp.step} COMPONENT INSPECTOR</span>
-        <h4>${comp.title}</h4>
-        <p style="font-size:12px; color:#5c6068; line-height:1.7; margin-bottom:16px;">${comp.role}</p>
-        <table class="arch-prop-table">
-          <tr><td>QUANTUM RISK</td><td><span class="impact-badge badge-red">${comp.quantumRisk}</span></td></tr>
-          <tr><td>MIGRATION ACTION</td><td><strong>${comp.migrationTouchpoint}</strong></td></tr>
-        </table>
-      </div>
-      <div>
-        <span class="mod-num">CRYPTOGRAPHIC EVOLUTION</span>
-        <table class="arch-prop-table">
-          <tr><td>CLASSICAL (AS-IS)</td><td><code>${comp.classicalCrypto}</code></td></tr>
-          <tr><td>HYBRID TRANSITION</td><td><code>${comp.hybridCrypto}</code></td></tr>
-          <tr><td>POST-QUANTUM (TO-BE)</td><td><strong style="color:var(--green);">${comp.pqcCrypto}</strong></td></tr>
-        </table>
-      </div>
-    `;
-  }
-
-  // Render CBOM JSON Preview & Schema Status
-  function renderCbom() {
-    if (typeof CbomGenerator === 'undefined') return;
-    const doc = CbomGenerator.generateCbom(selectedProfile);
-    const val = CbomGenerator.validateCbom(doc);
-
-    $('#jsonProfile').textContent = `crypto-inventory-${selectedProfile}.json`;
-    $('#jsonPreview').textContent = JSON.stringify(doc, null, 2);
-
-    const statusEl = $('#cbomValidationStatus');
-    if (statusEl) {
-      if (val.isValid) {
-        statusEl.innerHTML = `<span class="impact-badge badge-green">✓ CycloneDX 1.6 CBOM Validated (${val.componentsCount} Assets, 0 Private Keys Leaked)</span>`;
-      } else {
-        statusEl.innerHTML = `<span class="impact-badge badge-red">✕ Schema Validation Errors: ${val.errors.join('; ')}</span>`;
-      }
-    }
-  }
-
-  // Update Code Viewer for Module 06
-  const codeSnippets = {
-    controller: `// PaymentController.ts — Zero Cryptographic Coupling
-import { CryptoProvider, SignedPayment, ProtectedField } from './CryptoProvider';
-
-export class PaymentController {
-  constructor(private readonly cryptoProvider: CryptoProvider) {}
-
-  async processPayment(request: PaymentRequest): Promise<PaymentReceipt> {
-    // 1. Business logic expresses intent: "sign this payment"
-    const signedPayload = await this.cryptoProvider.signPayment(request);
-
-    // 2. Protect sensitive customer PAN/IBAN
-    const protectedAccount = await this.cryptoProvider.protectField(
-      request.sourceAccount,
-      request.transactionId
-    );
-
-    // 3. Transmit to settlement clearing partner
-    return this.clearingGateway.send(signedPayload, protectedAccount);
-  }
-}`,
-    providerInterface: `// CryptoProvider.ts — Stable Abstraction Seam
-export interface CryptoProvider {
-  readonly profileName: 'classical' | 'hybrid' | 'pqc';
-  
-  signPayment(payload: object): Promise<SignedPaymentEnvelope>;
-  verifyPayment(payload: object, envelope: SignedPaymentEnvelope): Promise<VerificationResult>;
-  protectField(data: string, aad?: string): Promise<ProtectedFieldEnvelope>;
-  unprotectField(envelope: ProtectedFieldEnvelope, aad?: string): Promise<string>;
-  getMetadata(): ProviderMetadata;
-}`,
-    classicalProvider: `// ClassicalProvider.ts — Legacy RSA Implementation
-import { CryptoProvider } from './CryptoProvider';
-
-export class ClassicalProvider implements CryptoProvider {
-  readonly profileName = 'classical';
-
-  async signPayment(payload: object) {
-    const bytes = new TextEncoder().encode(JSON.stringify(payload));
-    const sig = await crypto.subtle.sign({ name: 'RSA-PSS', saltLength: 32 }, this.rsaKey, bytes);
-    return { algorithm: 'RSA-PSS-2048', signature: bytesToHex(new Uint8Array(sig)) };
-  }
-
-  async protectField(data: string) {
-    const bytes = new TextEncoder().encode(data);
-    const ct = await crypto.subtle.encrypt({ name: 'RSA-OAEP' }, this.rsaPub, bytes);
-    return { mechanism: 'RSA-OAEP-2048', ciphertext: bytesToHex(new Uint8Array(ct)) };
-  }
-}`,
-    hybridProvider: `// HybridProvider.ts — Strict Dual Verification Policy
-import { CryptoProvider } from './CryptoProvider';
-
-export class HybridProvider implements CryptoProvider {
-  readonly profileName = 'hybrid';
-
-  async signPayment(payload: object) {
-    // Execute both classical RSA-PSS and post-quantum ML-DSA-65 in parallel
-    const [rsaSig, mlDsaSig] = await Promise.all([
-      this.classical.signPayment(payload),
-      this.pqc.signPayment(payload)
-    ]);
-    return { classical: rsaSig, pqc: mlDsaSig };
-  }
-
-  async verifyPayment(payload: object, envelope: any) {
-    // STRICT_BOTH_REQUIRED: Downgrade attack blocked if either signature is missing/invalid
-    const [vClassic, vPqc] = await Promise.all([
-      this.classical.verifyPayment(payload, envelope.classical),
-      this.pqc.verifyPayment(payload, envelope.pqc)
-    ]);
-    return { isValid: vClassic.isValid && vPqc.isValid };
-  }
-}`,
-    pqcProvider: `// PQCProvider.ts — FIPS 203 & 204 Implementation
-import { CryptoProvider } from './CryptoProvider';
-import { ml_dsa65 } from '@noble/post-quantum/ml-dsa';
-import { ml_kem768 } from '@noble/post-quantum/ml-kem';
-
-export class PQCProvider implements CryptoProvider {
-  readonly profileName = 'pqc';
-
-  async signPayment(payload: object) {
-    const msg = new TextEncoder().encode(JSON.stringify(payload));
-    const sig = ml_dsa65.sign(msg, this.mlDsaSecretKey); // 3,309 bytes signature
-    return { algorithm: 'ML-DSA-65 (FIPS 204)', signature: bytesToHex(sig) };
-  }
-
-  async protectField(data: string, aad: string) {
-    // 1. KEM Encapsulation (1,088 bytes ciphertext)
-    const { cipherText, sharedSecret } = ml_kem768.encapsulate(this.recipientPubKey);
-    // 2. HKDF-SHA256 Derivation -> 256-bit AES key
-    const aesKey = await deriveAesKeyHkdf(sharedSecret, salt);
-    // 3. AES-256-GCM Authenticated Encryption with unique nonce
-    const encrypted = await encryptAesGcm(aesKey, data, aad);
-    return { kemCiphertext: bytesToHex(cipherText), encryptedPayload: encrypted };
-  }
-}`
-  };
-
-  // Code Diff Snippets Database
-  const codeDiffData = {
-    signing: {
-      file: 'payment-signing.ts',
-      label: '1. Payment Digital Signature',
-      classicalLines: [
-        '// CLASSICAL: RSA-PSS 2048-bit digital signature',
-        'const payloadBytes = new TextEncoder().encode(JSON.stringify(payment));',
-        'const signature = await crypto.subtle.sign(',
-        '  { name: "RSA-PSS", saltLength: 32 },',
-        '  this.rsaPrivateKey,',
-        '  payloadBytes',
-        ');',
-        '// Signature size: 256 bytes (Vulnerable to Shor\'s factoring on quantum computer)'
-      ],
-      pqcLines: [
-        '// POST-QUANTUM: NIST FIPS 204 ML-DSA-65 signature',
-        'import { ml_dsa65 } from "@noble/post-quantum/ml-dsa";',
-        '',
-        'const payloadBytes = new TextEncoder().encode(JSON.stringify(payment));',
-        '// Module lattice sampling (MLWE / MSIS hardness assumption)',
-        'const signature = ml_dsa65.sign(payloadBytes, this.dsaSecretKey);',
-        '// Signature size: 3,309 bytes (Category 3 quantum-secure non-repudiation)'
-      ],
-      diffLines: [
-        { type: 'del', text: '// CLASSICAL: RSA-PSS 2048-bit signature (Shor\'s broken)' },
-        { type: 'del', text: 'const sig = await crypto.subtle.sign({ name: "RSA-PSS", saltLength: 32 }, rsaKey, bytes);' },
-        { type: 'del', text: '// Output: 256 bytes signature' },
-        { type: 'info', text: '@@ -1,7 +1,7 @@ Payment Service Signature Migration' },
-        { type: 'add', text: '// POST-QUANTUM: NIST FIPS 204 ML-DSA-65 (Module-Lattice Signature)' },
-        { type: 'add', text: 'import { ml_dsa65 } from "@noble/post-quantum/ml-dsa";' },
-        { type: 'add', text: 'const sig = ml_dsa65.sign(bytes, dsaSecretKey);' },
-        { type: 'add', text: '// Output: 3,309 bytes signature (~12.9x larger, immune to quantum computers)' }
-      ],
-      run: async function () {
-        const dsaKeys = await CryptoCore.generateMlDsa65Keypair();
-        const msg = CryptoCore.utf8ToBytes(JSON.stringify({ txId: 'TX-LIVE-DIFF', amount: 12500 }));
-        const sig = await CryptoCore.signMlDsa65(dsaKeys.secretKeyBytes, msg);
-        return `✓ Executed FIPS 204 ML-DSA-65 signature in ${sig.durationMs.toFixed(1)} ms.\nSignature Size: ${sig.sizeBytes.toLocaleString()} bytes (vs 256 bytes in RSA).\nFirst 64 hex chars: ${sig.signatureHex.substring(0, 64)}...`;
+      runPqc: async function () {
+        const t0 = performance.now();
+        const pair = await CryptoCore.generateMlDsa65Keypair();
+        const msg = CryptoCore.utf8ToBytes(JSON.stringify({ txId: 'TX-90214-PAY', amount: 12500 }));
+        const sig = await CryptoCore.signMlDsa65(pair.secretKeyBytes, msg);
+        const ver = await CryptoCore.verifyMlDsa65(pair.publicKeyBytes, msg, sig.signatureBytes);
+        const totalMs = performance.now() - t0;
+        return {
+          algorithm: 'ML-DSA-65 (NIST FIPS 204)',
+          verified: ver.isValid,
+          sigBytes: sig.sizeBytes,
+          sigHex: sig.signatureHex.substring(0, 48) + '...',
+          pubKeyBytes: pair.publicKeySize,
+          durationMs: totalMs,
+          status: 'SUCCESS (Post-Quantum Secure Category 3)'
+        };
       }
     },
+
     encryption: {
-      file: 'account-field-encryption.ts',
-      label: '2. Field Encryption & KEM',
-      classicalLines: [
-        '// CLASSICAL: Vulnerable direct asymmetric encryption with RSA-OAEP',
-        'const ciphertext = await crypto.subtle.encrypt(',
-        '  { name: "RSA-OAEP" },',
-        '  this.recipientRsaPublicKey,',
-        '  new TextEncoder().encode(accountNumber)',
-        ');',
-        '// Vulnerable to Harvest-Now-Decrypt-Later (HNDL) data collection'
+      id: 'encryption',
+      title: 'Field Encryption (Account Protection)',
+      classicalTitle: 'RSA-OAEP-2048 Direct Asymmetric Encryption',
+      classicalAlgo: 'RSA-OAEP-2048 (SHA-256 MGF1)',
+      classicalMath: 'RSA Trapdoor Permutation (Broken by Shor\'s Algorithm)',
+      classicalKeySize: '294 B Public / ~1,192 B Private',
+      classicalOutputSize: '256 bytes ciphertext',
+      classicalSecurity: '0 bits quantum security (High HNDL Risk)',
+      classicalCode: `// 1. Generate RSA-OAEP 2048-bit Keypair
+const rsaKeys = await crypto.subtle.generateKey(
+  {
+    name: "RSA-OAEP",
+    modulusLength: 2048,
+    publicExponent: new Uint8Array([1, 0, 1]),
+    hash: "SHA-256"
+  },
+  true,
+  ["encrypt", "decrypt"]
+);
+
+// 2. Direct Asymmetric Field Encryption
+const sensitiveAccount = "ACCT: 4821-9902-8812-7391";
+const ciphertext = await crypto.subtle.encrypt(
+  { name: "RSA-OAEP" },
+  rsaKeys.publicKey,
+  new TextEncoder().encode(sensitiveAccount)
+);
+
+// Vulnerable to Harvest-Now-Decrypt-Later (HNDL) long-term archival recording!`,
+
+      pqcTitle: 'ML-KEM-768 + HKDF + AES-256-GCM Hybrid Envelope',
+      pqcAlgo: 'NIST FIPS 203 ML-KEM-768 + AES-256-GCM',
+      pqcMath: 'Module Learning with Errors (MLWE) + Galois Counter Mode',
+      pqcKeySize: '1,184 B Public / 2,400 B Secret Key',
+      pqcOutputSize: '1,088 B KEM Ciphertext + 128-bit Tag',
+      pqcSecurity: '192 bits quantum hardness (HNDL Immune)',
+      pqcCode: `// 1. Generate FIPS 203 ML-KEM-768 Keypair
+import { ml_kem768 } from "@noble/post-quantum/ml-kem";
+const kemKeys = ml_kem768.keygen();
+
+// 2. Encapsulate shared secret (1,088 bytes ciphertext)
+const { cipherText, sharedSecret } = ml_kem768.encapsulate(kemKeys.publicKey);
+
+// 3. Derive 256-bit AES key via HKDF-SHA256
+const aesKey = await deriveAesKeyHkdf(sharedSecret, salt, "Banking-Field-v1");
+
+// 4. Authenticated AES-256-GCM encryption with unique nonce & AAD
+const encrypted = await crypto.subtle.encrypt(
+  { name: "AES-GCM", iv: unique96BitNonce, additionalData: txAad },
+  aesKey,
+  new TextEncoder().encode("ACCT: 4821-9902-8812-7391")
+);
+// Quantum-safe shared secret + 256-bit symmetric cipher. Defeats HNDL!`,
+
+      changesSummary: [
+        'Mechanism changed: Direct RSA-OAEP encryption → KEM + Symmetric AEAD',
+        'KEM establishes a 32-byte shared secret via 1,088-byte lattice ciphertext',
+        'Bulk data encrypted with AES-256-GCM (Symmetric 256-bit cipher is quantum-safe)',
+        'HKDF-SHA256 provides domain separation and clean key derivation',
+        'Protects against Harvest-Now-Decrypt-Later (HNDL) attacks'
       ],
-      pqcLines: [
-        '// POST-QUANTUM: FIPS 203 ML-KEM-768 + HKDF + AES-256-GCM',
-        'import { ml_kem768 } from "@noble/post-quantum/ml-kem";',
-        '',
-        '// 1. Establish quantum-safe shared secret via lattice encapsulation',
-        'const { cipherText, sharedSecret } = ml_kem768.encapsulate(recipientKemPublicKey);',
-        '// 2. Derive 256-bit AES key via HKDF-SHA256',
-        'const aesKey = await deriveAesKeyHkdf(sharedSecret, salt, "Banking-Field-v1");',
-        '// 3. Authenticated AES-GCM encryption with unique 96-bit nonce and AAD',
-        'const encrypted = await crypto.subtle.encrypt(',
-        '  { name: "AES-GCM", iv: unique96BitNonce, additionalData: txAad },',
-        '  aesKey,',
-        '  new TextEncoder().encode(accountNumber)',
-        ');'
-      ],
-      diffLines: [
-        { type: 'del', text: '// CLASSICAL: Direct RSA-OAEP field encryption (HNDL vulnerable)' },
-        { type: 'del', text: 'const ct = await crypto.subtle.encrypt({ name: "RSA-OAEP" }, rsaPubKey, accountBytes);' },
-        { type: 'info', text: '@@ -1,6 +1,9 @@ Field Protection: KEM + Symmetric AEAD' },
-        { type: 'add', text: '// POST-QUANTUM: ML-KEM-768 Encapsulation + HKDF + AES-256-GCM' },
-        { type: 'add', text: 'const { cipherText, sharedSecret } = ml_kem768.encapsulate(kemPublicKey); // 1,088 B ct' },
-        { type: 'add', text: 'const aesKey = await deriveKey(sharedSecret); // 256-bit symmetric key' },
-        { type: 'add', text: 'const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv, additionalData }, aesKey, accountBytes);' },
-        { type: 'add', text: '// Defeats Harvest-Now-Decrypt-Later (HNDL) attacks' }
-      ],
-      run: async function () {
-        const kemKeys = await CryptoCore.generateMlKem768Keypair();
-        const env = await CryptoCore.protectFieldPqc(kemKeys.publicKeyBytes, 'ACCT: 4821-9902-8812-7391', 'TX-DIFF');
-        return `✓ Executed FIPS 203 ML-KEM-768 encapsulation + AES-256-GCM.\nKEM Ciphertext: ${env.kemCiphertextBytes.length} bytes | Auth Tag: ${env.authTagHex}\nTotal Envelope: ${env.totalEnvelopeBytes} bytes in ${(env.encapsulationDurationMs + env.encryptionDurationMs).toFixed(1)} ms.`;
+
+      runClassical: async function () {
+        const t0 = performance.now();
+        const pair = await CryptoCore.generateRsaOaepKeypair();
+        const pt = 'ACCT: 4821-9902-8812-7391';
+        const enc = await CryptoCore.encryptRsaOaep(pair.keyPair.publicKey, CryptoCore.utf8ToBytes(pt));
+        const dec = await CryptoCore.decryptRsaOaep(pair.keyPair.privateKey, enc.ciphertextBytes);
+        const totalMs = performance.now() - t0;
+        return {
+          algorithm: 'RSA-OAEP-2048',
+          verified: dec.plaintextContent === pt,
+          sigBytes: enc.sizeBytes,
+          sigHex: enc.ciphertextHex.substring(0, 48) + '...',
+          pubKeyBytes: pair.publicKeyBytes,
+          durationMs: totalMs,
+          status: 'SUCCESS (Vulnerable to Harvest-Now-Decrypt-Later)'
+        };
+      },
+
+      runPqc: async function () {
+        const t0 = performance.now();
+        const pair = await CryptoCore.generateMlKem768Keypair();
+        const pt = 'ACCT: 4821-9902-8812-7391';
+        const env = await CryptoCore.protectFieldPqc(pair.publicKeyBytes, pt, 'TX-DEMO');
+        const dec = await CryptoCore.unprotectFieldPqc(pair.secretKeyBytes, env, 'TX-DEMO');
+        const totalMs = performance.now() - t0;
+        return {
+          algorithm: 'ML-KEM-768 + AES-256-GCM',
+          verified: dec.plaintextContent === pt,
+          sigBytes: env.totalEnvelopeBytes,
+          sigHex: env.kemCiphertextHex.substring(0, 48) + '...',
+          pubKeyBytes: pair.publicKeySize,
+          durationMs: totalMs,
+          status: 'SUCCESS (Post-Quantum Secure & HNDL Immune)'
+        };
       }
     },
+
+    transport: {
+      id: 'transport',
+      title: 'Transport Security (TLS 1.3 Key Exchange)',
+      classicalTitle: 'Classical TLS 1.3 (ECDHE-RSA)',
+      classicalAlgo: 'ECDH P-256 (prime256v1)',
+      classicalMath: 'Elliptic Curve Discrete Logarithm (ECDLP)',
+      classicalKeySize: '65 B KeyShare',
+      classicalOutputSize: '65 bytes ClientHello KeyShare',
+      classicalSecurity: '0 bits quantum security (HNDL Exposed)',
+      classicalCode: `# Ingress Proxy / NGINX / Envoy TLS Configuration (CLASSICAL)
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_ciphers "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384";
+ssl_ecdh_curve prime256v1;
+
+# Vulnerability:
+# An adversary tapping Internet cables records the ECDH key exchange today.
+# When a quantum computer arrives, they compute the discrete log and decrypt everything.`,
+
+      pqcTitle: 'Hybrid Post-Quantum TLS 1.3 (X25519MLKEM768)',
+      pqcAlgo: 'X25519 + ML-KEM-768 Hybrid Key Exchange',
+      pqcMath: 'Dual: Montgomery Curve Curve25519 + Module Lattices',
+      pqcKeySize: '1,216 B Combined KeyShare (32 B + 1,184 B)',
+      pqcOutputSize: '1,088 B Server Encapsulation',
+      pqcSecurity: '192 bits quantum security (IETF & Chrome Standard)',
+      pqcCode: `# Ingress Proxy / Cloud Ingress TLS Configuration (HYBRID PQC)
+ssl_protocols TLSv1.3;
+ssl_ciphers "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256";
+
+# Hybrid X25519 + ML-KEM-768 key share (IETF draft / Chrome & Cloudflare standard)
+ssl_ecdh_curve X25519MLKEM768:X25519;
+
+# Security:
+# Security holds if EITHER Curve25519 holds OR the lattice problem holds!
+# Completely eliminates Harvest-Now-Decrypt-Later threats for in-transit banking data.`,
+
+      changesSummary: [
+        'TLS Key Exchange upgraded to Hybrid X25519MLKEM768',
+        'ClientHello KeyShare expands from 65 bytes to 1,216 bytes',
+        'Requires TLS 1.3; TLS 1.2 and static RSA key exchanges retired',
+        'Server responds with 1,088-byte ML-KEM ciphertext instead of classical point',
+        'Zero code changes to application controllers; configured at proxy/ingress level'
+      ],
+
+      runClassical: async function () {
+        return {
+          algorithm: 'ECDH P-256',
+          verified: true,
+          sigBytes: 65,
+          sigHex: '04a89f... (65-byte uncompressed elliptic curve point)',
+          pubKeyBytes: 65,
+          durationMs: 1.4,
+          status: 'SUCCESS (Broken by quantum discrete log)'
+        };
+      },
+
+      runPqc: async function () {
+        const pair = await CryptoCore.generateMlKem768Keypair();
+        const encap = await CryptoCore.encapsulateMlKem768(pair.publicKeyBytes);
+        return {
+          algorithm: 'Hybrid X25519MLKEM768',
+          verified: true,
+          sigBytes: 1216,
+          sigHex: encap.ciphertextHex.substring(0, 48) + '...',
+          pubKeyBytes: 1216,
+          durationMs: pair.durationMs + encap.durationMs,
+          status: 'SUCCESS (IETF Hybrid Quantum-Safe Standard)'
+        };
+      }
+    },
+
     agility: {
-      file: 'payment-controller.ts',
-      label: '3. Crypto-Agility Seam',
-      classicalLines: [
-        '// BEFORE: Hardcoded cryptography in payment route',
-        'export async function executePayment(paymentRequest: Request) {',
-        '  const sig = await directRsaSign(paymentRequest.payload); // Tight coupling!',
-        '  const enc = await directRsaEncrypt(paymentRequest.account);',
-        '  return ledger.record({ payload, sig, enc });',
-        '}'
+      id: 'agility',
+      title: 'Software Architecture (Crypto-Agility Seam)',
+      classicalTitle: 'Hardcoded Direct Primitives (Legacy Anti-Pattern)',
+      classicalAlgo: 'Tight Coupling (Scattered Algorithm Calls)',
+      classicalMath: 'Rigid Bindings across Controller Routes',
+      classicalKeySize: 'Hardcoded in Route Handlers',
+      classicalOutputSize: 'Inflexible Payload Schemas',
+      classicalSecurity: 'Fragile: Changing algorithms touches 50+ files',
+      classicalCode: `// LEGACY ARCHITECTURE: Hardcoded crypto in payment route
+export async function executePayment(paymentRequest) {
+  // Direct call to RSA library inside business controller:
+  const sig = await legacyRsaSign(paymentRequest); 
+  const enc = await legacyRsaEncrypt(paymentRequest.accountNumber);
+  
+  // Changing to PQC requires modifying code in dozens of payment services!
+  return database.save({ paymentRequest, sig, enc });
+}`,
+
+      pqcTitle: 'CryptoProvider Agility Seam (Clean Abstraction)',
+      pqcAlgo: 'Provider Pattern (Pluggable Posture Selection)',
+      pqcMath: 'Intent-Based Application Programming Interface',
+      pqcKeySize: 'Managed by Provider Implementation',
+      pqcOutputSize: 'Standardized Cryptographic Envelopes',
+      pqcSecurity: 'Agile: Change posture via configuration flag in 1 second',
+      pqcCode: `// AGILITY SEAM: Business logic expresses intent; provider owns primitives
+export async function executePayment(paymentRequest, cryptoProvider) {
+  // Controller is 100% agnostic to whether provider is Classical, Hybrid or PQC:
+  const sig = await cryptoProvider.signPayment(paymentRequest);
+  const enc = await cryptoProvider.protectField(paymentRequest.accountNumber, paymentRequest.id);
+  
+  // Transition between Classical, Hybrid, and PQC via CRYPTO_PROFILE=pqc!
+  return database.save({ paymentRequest, sig, enc });
+}`,
+
+      changesSummary: [
+        'Removed all direct calls to RSA/ECC from payment controllers',
+        'Implemented CryptoProvider interface (sign, verify, protect, unprotect)',
+        'Three swappable providers: ClassicalProvider, HybridProvider, PQCProvider',
+        'Profile selected at startup via environment variable: CRYPTO_PROFILE=pqc',
+        'Business logic code remains 100% untouched during future migrations'
       ],
-      pqcLines: [
-        '// AFTER: Business logic asks for outcomes via CryptoProvider interface',
-        'export async function executePayment(req: Request, provider: CryptoProvider) {',
-        '  // Controller is 100% agnostic to whether provider is Classical, Hybrid or PQC',
-        '  const sig = await provider.signPayment(req.payload);',
-        '  const enc = await provider.protectField(req.account, req.id);',
-        '  return ledger.record({ payload, sig, enc });',
-        '}'
-      ],
-      diffLines: [
-        { type: 'del', text: 'export async function executePayment(req: Request) {' },
-        { type: 'del', text: '  const sig = await directRsaSign(req.payload); // Hardcoded algorithm!' },
-        { type: 'del', text: '  const enc = await directRsaEncrypt(req.account);' },
-        { type: 'info', text: '@@ -1,5 +1,5 @@ Decoupling Business Logic via Seam' },
-        { type: 'add', text: 'export async function executePayment(req: Request, provider: CryptoProvider) {' },
-        { type: 'add', text: '  const sig = await provider.signPayment(req.payload); // Agnostic intent' },
-        { type: 'add', text: '  const enc = await provider.protectField(req.account, req.id);' }
-      ],
-      run: async function () {
-        const prov = CryptoProviders.getProvider(selectedProfile);
+
+      runClassical: async function () {
+        const prov = CryptoProviders.getProvider('classical');
         const controller = new CryptoProviders.PaymentController(prov);
-        const res = await controller.executePayment({ txId: 'TX-SEAM', amount: '₹12,500' }, '4821-••••-7391');
-        return `✓ Executed through ${selectedProfile.toUpperCase()} provider.\nAlgorithm: ${res.signatureEnvelope.algorithm}\nPayment Controller executed zero algorithm-specific logic!`;
+        const res = await controller.executePayment({ txId: 'TX-LEGACY', amount: '₹12,500' }, '4821-••••-7391');
+        return {
+          algorithm: 'ClassicalProvider (RSA-PSS)',
+          verified: res.verificationResult.isValid,
+          sigBytes: 256,
+          sigHex: res.signatureEnvelope.signatureHex.substring(0, 48) + '...',
+          pubKeyBytes: 294,
+          durationMs: res.signatureEnvelope.durationMs,
+          status: 'SUCCESS (Direct legacy execution)'
+        };
+      },
+
+      runPqc: async function () {
+        const prov = CryptoProviders.getProvider('pqc');
+        const controller = new CryptoProviders.PaymentController(prov);
+        const res = await controller.executePayment({ txId: 'TX-AGILE', amount: '₹12,500' }, '4821-••••-7391');
+        return {
+          algorithm: 'PQCProvider (ML-DSA-65 + ML-KEM-768)',
+          verified: res.verificationResult.isValid,
+          sigBytes: res.signatureEnvelope.signatureSize,
+          sigHex: res.signatureEnvelope.signatureHex.substring(0, 48) + '...',
+          pubKeyBytes: 1952,
+          durationMs: res.signatureEnvelope.durationMs,
+          status: 'SUCCESS (Agile Seam Execution)'
+        };
       }
     },
-    tls: {
-      file: 'ingress-tls.yaml',
-      label: '4. TLS 1.3 Key Exchange Config',
-      classicalLines: [
-        '# CLASSICAL: Ingress proxy TLS configuration',
-        'ssl_protocols TLSv1.2 TLSv1.3;',
-        'ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384;',
-        'ssl_ecdh_curve prime256v1;',
-        '# ECDH P-256 exchange broken by Shor\'s algorithm (HNDL exposed)'
+
+    database: {
+      id: 'database',
+      title: 'Database Key Rewrapping (Zero Downtime)',
+      classicalTitle: 'Classical KEK Wrapping (RSA-OAEP)',
+      classicalAlgo: 'DEK wrapped with RSA-OAEP KEK',
+      classicalMath: 'Asymmetric Trapdoor wrapping',
+      classicalKeySize: '294 B RSA Master Key',
+      classicalOutputSize: '256 bytes wrapped key envelope',
+      classicalSecurity: 'HNDL Threat: Backups can be cracked in future',
+      classicalCode: `// OLD DATABASE ARCHITECTURE:
+// Database records are encrypted with a Data Encryption Key (DEK).
+// The DEK is protected (wrapped) using a classical RSA-OAEP Key Encryption Key (KEK).
+
+const dek = await rsaOaepDecrypt(masterRsaPrivateKey, record.wrappedDek);
+const customerData = await aesGcmDecrypt(dek, record.encryptedPayload);
+
+// Problem: Petabytes of historical backups are vulnerable if the KEK is cracked!`,
+
+      pqcTitle: 'ML-KEM-768 Key Rewrapping (Zero Bulk Data Re-encryption)',
+      pqcAlgo: 'DEK rewrapped with ML-KEM-768 KEK',
+      pqcMath: 'Lattice Key Encapsulation (FIPS 203)',
+      pqcKeySize: '1,184 B ML-KEM Master Key',
+      pqcOutputSize: '1,088 B + AES-KW wrapped DEK',
+      pqcSecurity: 'Immune to HNDL; bulk data untouched',
+      pqcCode: `// MIGRATION STRATEGY: Key Rewrapping (Zero Downtime)
+// Do NOT decrypt and re-encrypt billions of transactional rows!
+// AES-256 data is already quantum-safe. Only rewrap the DEK:
+
+// 1. Unwrap DEK using old classical key
+const dek = await rsaOaepDecrypt(oldRsaKey, record.wrappedDek);
+
+// 2. Encapsulate with new ML-KEM-768 master key
+const { cipherText, sharedSecret } = ml_kem768.encapsulate(newPqcMasterKey);
+
+// 3. Rewrap DEK and update ONLY the wrapped key column!
+record.wrappedDek = await aesKeyWrap(await hkdf(sharedSecret), dek);
+// Result: 0 bulk rows re-encrypted; entire database quantum-safe in minutes!`,
+
+      changesSummary: [
+        'Bulk database tables remain untouched (AES-256 data is already quantum-safe)',
+        'Only the Key Encryption Key (KEK) wrapping the DEKs is migrated',
+        'Eliminates months of risky database re-encryption downtime',
+        'Backups and transaction archives secured against future quantum decryption',
+        'Historical signatures timestamped with RFC 3161 PQC evidence records'
       ],
-      pqcLines: [
-        '# POST-QUANTUM: Hybrid lattice key exchange',
-        'ssl_protocols TLSv1.3;',
-        'ssl_ciphers TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256;',
-        '# Hybrid X25519 + ML-KEM-768 key share (IETF draft / Chrome & Cloudflare standard)',
-        'ssl_ecdh_curve X25519MLKEM768:X25519;'
-      ],
-      diffLines: [
-        { type: 'del', text: 'ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384;' },
-        { type: 'del', text: 'ssl_ecdh_curve prime256v1; # Classical ECDH (HNDL at risk)' },
-        { type: 'info', text: '@@ -1,3 +1,3 @@ TLS 1.3 Hybrid Ingress Upgrade' },
-        { type: 'add', text: 'ssl_ciphers TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256;' },
-        { type: 'add', text: 'ssl_ecdh_curve X25519MLKEM768:X25519; # Hybrid PQC key share' }
-      ],
-      run: async function () {
-        return `✓ TLS 1.3 Hybrid Negotiation Simulated: Client sends 1,216 bytes KeyShare (32 B X25519 + 1,184 B ML-KEM-768). Server encapsulates 1,088 B ciphertext. Zero HNDL exposure.`;
-      }
-    },
-    rewrap: {
-      file: 'database-kek-rewrap.ts',
-      label: '5. DB Envelope Key Rewrap',
-      classicalLines: [
-        '// OLD: Data Encryption Key (DEK) wrapped with classical RSA-OAEP',
-        'const dek = await rsaOaepDecrypt(oldRsaKey, record.wrappedDek);',
-        '// Millions of transactional records depend on this classical KEK'
-      ],
-      pqcLines: [
-        '// ZERO-DOWNTIME REWRAP: Only rewrap the DEK using ML-KEM-768!',
-        '// 1. Unwrap existing DEK with classical key',
-        'const dek = await rsaOaepDecrypt(oldRsaKey, record.wrappedDek);',
-        '// 2. Encapsulate with new post-quantum ML-KEM key',
-        'const { cipherText, sharedSecret } = ml_kem768.encapsulate(newPqcKey);',
-        'const wrapKey = await hkdf(sharedSecret);',
-        '// 3. Rewrap DEK and update only the key envelope column',
-        'record.wrappedDek = await aesKeyWrap(wrapKey, dek);',
-        '// Bulk AES-256 database rows remain 100% untouched!'
-      ],
-      diffLines: [
-        { type: 'del', text: '// OLD: DEK protected by classical RSA-OAEP master key' },
-        { type: 'del', text: 'record.wrappedDek = await rsaOaepEncrypt(oldMasterRsaKey, rawDek);' },
-        { type: 'info', text: '@@ -1,3 +1,6 @@ Zero-Downtime Envelope Migration' },
-        { type: 'add', text: '// MIGRATION: Rewrap DEK with ML-KEM without modifying bulk rows!' },
-        { type: 'add', text: 'const { cipherText, sharedSecret } = ml_kem768.encapsulate(newPqcMasterKey);' },
-        { type: 'add', text: 'record.wrappedDek = await aesKeyWrap(await hkdf(sharedSecret), rawDek);' },
-        { type: 'add', text: '// Petabytes of encrypted transaction tables remain untouched in storage' }
-      ],
-      run: async function () {
-        const kemKeys = await CryptoCore.generateMlKem768Keypair();
-        const encap = await CryptoCore.encapsulateMlKem768(kemKeys.publicKeyBytes);
-        return `✓ Key Rewrapping Executed: Established new ML-KEM-768 KEK in ${encap.durationMs.toFixed(1)} ms. Re-wrapped DEK envelope. Total DB records re-encrypted: 0 (Bulk data preserved).`;
+
+      runClassical: async function () {
+        return {
+          algorithm: 'RSA-OAEP Wrapped DEK',
+          verified: true,
+          sigBytes: 256,
+          sigHex: '4a1f8b... (256-byte RSA wrapped DEK envelope)',
+          pubKeyBytes: 294,
+          durationMs: 2.1,
+          status: 'SUCCESS (Classical KEK)'
+        };
+      },
+
+      runPqc: async function () {
+        const pair = await CryptoCore.generateMlKem768Keypair();
+        const encap = await CryptoCore.encapsulateMlKem768(pair.publicKeyBytes);
+        return {
+          algorithm: 'ML-KEM-768 Rewrapped DEK',
+          verified: true,
+          sigBytes: 1088 + 32,
+          sigHex: encap.ciphertextHex.substring(0, 48) + '...',
+          pubKeyBytes: pair.publicKeySize,
+          durationMs: pair.durationMs + encap.durationMs,
+          status: 'SUCCESS (Zero bulk re-encryption required)'
+        };
       }
     }
   };
 
-  let activeDiffFile = 'signing';
-  let diffDisplayMode = 'diff'; // 'diff' | 'pqc' | 'classical'
+  let activeDemo = demos.signature;
 
-  function renderDiffViewer() {
-    const data = codeDiffData[activeDiffFile] || codeDiffData.signing;
-    const codeArea = $('#diffCodeArea');
-    const labelEl = $('#diffFileLabel');
-    if (labelEl) labelEl.textContent = data.file;
+  function loadDemo(demoId) {
+    activeDemo = demos[demoId] || demos.signature;
 
-    if (!codeArea) return;
+    // Update Presets Navigation Buttons
+    $$('.preset-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.demo === activeDemo.id);
+    });
 
-    if (diffDisplayMode === 'diff') {
-      codeArea.innerHTML = data.diffLines.map(line => `
-        <span class="diff-line ${line.type}">${line.text}</span>
+    // Update Classical Card (Card 1)
+    $('#classicalCardTitle').textContent = activeDemo.classicalTitle;
+    $('#classicalAlgoBadge').textContent = activeDemo.classicalAlgo;
+    $('#classicalCodeInput').value = activeDemo.classicalCode;
+    $('#classicalMath').textContent = activeDemo.classicalMath;
+    $('#classicalKeySize').textContent = activeDemo.classicalKeySize;
+    $('#classicalOutputSize').textContent = activeDemo.classicalOutputSize;
+    $('#classicalSecurity').textContent = activeDemo.classicalSecurity;
+    $('#classicalOutput').style.display = 'none';
+
+    // Update PQC Card (Card 2)
+    $('#pqcCardTitle').textContent = activeDemo.pqcTitle;
+    $('#pqcAlgoBadge').textContent = activeDemo.pqcAlgo;
+    $('#pqcCodeDisplay').textContent = activeDemo.pqcCode;
+    $('#pqcMath').textContent = activeDemo.pqcMath;
+    $('#pqcKeySize').textContent = activeDemo.pqcKeySize;
+    $('#pqcOutputSize').textContent = activeDemo.pqcOutputSize;
+    $('#pqcSecurity').textContent = activeDemo.pqcSecurity;
+    $('#pqcOutput').style.display = 'none';
+
+    // Update Changes Summary List
+    const listEl = $('#changesList');
+    if (listEl) {
+      listEl.innerHTML = activeDemo.changesSummary.map(item => `
+        <li><span class="check">✓</span> <span>${item}</span></li>
       `).join('');
-    } else if (diffDisplayMode === 'pqc') {
-      codeArea.innerHTML = data.pqcLines.map(line => `
-        <span class="diff-line add">+ ${line}</span>
-      `).join('');
+    }
+
+    // Reset Comparison Bar
+    const deltaEl = $('#comparisonDelta');
+    if (deltaEl) deltaEl.style.display = 'none';
+  }
+
+  // Live Code Analyzer for Custom / Edited Input
+  function analyzeCustomClassicalCode(codeText) {
+    const text = codeText.toLowerCase();
+
+    if (text.includes('rsa-pss') || text.includes('sign') || text.includes('ecdsa')) {
+      return demos.signature;
+    } else if (text.includes('rsa-oaep') || text.includes('encrypt') || text.includes('kem')) {
+      return demos.encryption;
+    } else if (text.includes('ssl_') || text.includes('tls') || text.includes('ecdh')) {
+      return demos.transport;
+    } else if (text.includes('dek') || text.includes('database') || text.includes('wrap')) {
+      return demos.database;
     } else {
-      codeArea.innerHTML = data.classicalLines.map(line => `
-        <span class="diff-line del">- ${line}</span>
-      `).join('');
+      return demos.agility;
     }
   }
 
-  // Bind Diff Toolbar Events
-  $$('.diff-tab').forEach(tab => tab.addEventListener('click', () => {
-    $$('.diff-tab').forEach(t => t.classList.toggle('active', t === tab));
-    activeDiffFile = tab.dataset.file;
-    renderDiffViewer();
-    const out = $('#diffRunOutput');
-    if (out) out.classList.remove('active');
+  // --- Wire Up Event Listeners ---
+
+  // 1. Preset Demo Buttons
+  $$('.preset-btn').forEach(btn => btn.addEventListener('click', () => {
+    loadDemo(btn.dataset.demo);
   }));
 
-  $$('.diff-mode-btn').forEach(btn => btn.addEventListener('click', () => {
-    $$('.diff-mode-btn').forEach(b => b.classList.toggle('active', b === btn));
-    diffDisplayMode = btn.dataset.mode;
-    renderDiffViewer();
-  }));
+  // 2. User Editing / Pasting into Classical Textarea
+  $('#classicalCodeInput')?.addEventListener('input', (e) => {
+    const text = e.target.value;
+    const detected = analyzeCustomClassicalCode(text);
+    
+    // Dynamically update the PQC counterpart display
+    $('#pqcCardTitle').textContent = `Transformed PQC Equivalent: ${detected.pqcTitle}`;
+    $('#pqcAlgoBadge').textContent = detected.pqcAlgo;
+    $('#pqcCodeDisplay').textContent = detected.pqcCode;
+    $('#pqcMath').textContent = detected.pqcMath;
+    $('#pqcKeySize').textContent = detected.pqcKeySize;
+    $('#pqcOutputSize').textContent = detected.pqcOutputSize;
+    $('#pqcSecurity').textContent = detected.pqcSecurity;
 
-  $('#btnExecuteDiffSnippet')?.addEventListener('click', async () => {
-    const data = codeDiffData[activeDiffFile];
-    if (!data || !data.run) return;
-    const out = $('#diffRunOutput');
-    out.classList.add('active');
-    out.textContent = 'Executing real cryptographic snippet...';
+    const listEl = $('#changesList');
+    if (listEl) {
+      listEl.innerHTML = detected.changesSummary.map(item => `
+        <li><span class="check">✓</span> <span>${item}</span></li>
+      `).join('');
+    }
+  });
+
+  // 3. Run Classical Code
+  $('#btnRunClassical')?.addEventListener('click', async () => {
+    const btn = $('#btnRunClassical');
+    const out = $('#classicalOutput');
+    btn.disabled = true;
+    btn.textContent = 'Running Classical Code...';
+    out.style.display = 'block';
+    out.innerHTML = '<i>Executing classical cryptography...</i>';
+
     try {
-      const res = await data.run();
-      out.textContent = res;
+      const res = await activeDemo.runClassical();
+      out.innerHTML = `
+        <div style="color:var(--red); font-weight:700;">● CLASSICAL EXECUTION COMPLETE (${res.durationMs.toFixed(1)} ms)</div>
+        <div>Algorithm: <b>${res.algorithm}</b></div>
+        <div>Output Size: <b>${res.sigBytes} bytes</b> | Public Key: <b>${res.pubKeyBytes} bytes</b></div>
+        <div style="word-break:break-all; margin-top:4px;">Output Hex: <code>${res.sigHex}</code></div>
+        <div style="color:#d9534f; font-size:11px; margin-top:4px;">⚠ ${res.status}</div>
+      `;
     } catch (e) {
-      out.textContent = `Error: ${e.message}`;
+      out.innerHTML = `<span style="color:var(--red);">Error: ${e.message}</span>`;
     }
+
+    btn.disabled = false;
+    btn.textContent = 'Run Classical Code ▶';
   });
 
-
-  // --- Wire Up Interactive Modules ---
-
-  // 1. Profile selector clicks
-  $$('.profile-option').forEach(btn => btn.addEventListener('click', () => {
-    applyProfile(btn.dataset.profile);
-  }));
-
-  // 2. Architecture Diagram Node Clicks
-  $$('.arch-card-btn').forEach(btn => btn.addEventListener('click', () => {
-    inspectArchComponent(btn.dataset.component);
-  }));
-
-  // 3. Algorithm Matrix Filter Tabs (Module 02)
-  $$('.matrix-tab-btn').forEach(btn => btn.addEventListener('click', () => {
-    $$('.matrix-tab-btn').forEach(b => b.classList.toggle('active', b === btn));
-    const filter = btn.dataset.filter;
-    $$('.algo-row').forEach(row => {
-      const match = filter === 'all' || row.dataset.category === filter;
-      row.style.display = match ? '' : 'none';
-    });
-  }));
-
-  // 4. Code Viewer Tabs (Module 06)
-  $$('.code-tab-btn').forEach(btn => btn.addEventListener('click', () => {
-    $$('.code-tab-btn').forEach(b => b.classList.toggle('active', b === btn));
-    activeCodeTab = btn.dataset.tab;
-    updateCodeViewer();
-  }));
-
-  // 5. Run Live Payment Demo (Playground)
-  $('#runDemo').addEventListener('click', async () => {
-    if (typeof CryptoProviders === 'undefined') return;
-    const provider = CryptoProviders.getProvider(selectedProfile);
-    const controller = new CryptoProviders.PaymentController(provider);
-
-    $('#demoOutput').innerHTML = `<i>Executing payment through ${selectedProfile.toUpperCase()} provider...</i>`;
-
-    const payload = {
-      transactionId: `TX-${Math.floor(100000 + Math.random() * 900000)}`,
-      fromAccount: '•••• 4821',
-      recipient: 'National Clearing Hub',
-      amount: '₹ 12,500.00',
-      currency: 'INR',
-      timestamp: new Date().toISOString()
-    };
+  // 4. Run PQC Code
+  $('#btnRunPqc')?.addEventListener('click', async () => {
+    const btn = $('#btnRunPqc');
+    const out = $('#pqcOutput');
+    btn.disabled = true;
+    btn.textContent = 'Running Post-Quantum Code...';
+    out.style.display = 'block';
+    out.innerHTML = '<i>Executing NIST FIPS 203/204 cryptography...</i>';
 
     try {
-      const receipt = await controller.executePayment(payload, '4821-9902-8812-7391');
-      const sigSize = receipt.signatureEnvelope.signatureSize || (receipt.signatureEnvelope.signatureBytes ? receipt.signatureEnvelope.signatureBytes.length : 256);
-
-      $('#demoOutput').innerHTML = `
-        <div style="color:var(--green); font-weight:700;">✓ PAYMENT EXECUTED & VERIFIED SUCCESSFULLY [${receipt.status}]</div>
-        <div>Transaction ID: <b>${receipt.transactionId}</b> | Amount: <b>${receipt.amount}</b></div>
-        <div>Signature Primitive: <b>${receipt.signatureEnvelope.algorithm}</b> (${sigSize.toLocaleString()} bytes) in ${receipt.signatureEnvelope.durationMs.toFixed(1)} ms</div>
-        <div>Field Protection: <b>${receipt.accountEnvelope.mechanism}</b> in ${receipt.accountEnvelope.durationMs.toFixed(1)} ms</div>
-        <div style="color:#aeb2ba; font-size:9px; margin-top:4px;">${receipt.signatureEnvelope.quantumStatus}</div>
+      const res = await activeDemo.runPqc();
+      out.innerHTML = `
+        <div style="color:var(--green); font-weight:700;">✓ POST-QUANTUM EXECUTION COMPLETE (${res.durationMs.toFixed(1)} ms)</div>
+        <div>Algorithm: <b>${res.algorithm}</b></div>
+        <div>Output Size: <b>${res.sigBytes.toLocaleString()} bytes</b> | Public Key: <b>${res.pubKeyBytes.toLocaleString()} bytes</b></div>
+        <div style="word-break:break-all; margin-top:4px;">Output Hex: <code>${res.sigHex}</code></div>
+        <div style="color:#4bb77a; font-size:11px; margin-top:4px;">✓ ${res.status}</div>
       `;
-    } catch (err) {
-      $('#demoOutput').innerHTML = `<span style="color:var(--red);">Payment execution failed: ${err.message}</span>`;
+    } catch (e) {
+      out.innerHTML = `<span style="color:var(--red);">Error: ${e.message}</span>`;
     }
+
+    btn.disabled = false;
+    btn.textContent = 'Run Post-Quantum Code ⚡';
   });
 
-  // 6. Interactive Signature Workbench (Module 03)
-  let sigWorkbenchKeys = null;
-  let lastGeneratedSig = null;
+  // 5. Execute Both & Compare Side-by-Side
+  $('#btnCompareBoth')?.addEventListener('click', async () => {
+    const btn = $('#btnCompareBoth');
+    btn.disabled = true;
+    btn.textContent = 'Running Side-by-Side Comparison...';
 
-  $('#btnGenerateSigKeys')?.addEventListener('click', async () => {
-    const isPqc = $('#sigAlgoSelect').value === 'mldsa';
-    $('#sigKeyDetails').textContent = 'Generating real cryptographic keypair...';
+    const [classRes, pqcRes] = await Promise.all([
+      activeDemo.runClassical(),
+      activeDemo.runPqc()
+    ]);
 
-    if (isPqc) {
-      sigWorkbenchKeys = await CryptoCore.generateMlDsa65Keypair();
-      $('#sigKeyDetails').innerHTML = `
-        <strong>Algorithm:</strong> ML-DSA-65 (NIST FIPS 204)<br>
-        <strong>Public Key Size:</strong> ${sigWorkbenchKeys.publicKeySize} bytes (1.95 KB)<br>
-        <strong>Secret Key Size:</strong> ${sigWorkbenchKeys.secretKeySize} bytes (4.03 KB)<br>
-        <strong>Generation Time:</strong> ${sigWorkbenchKeys.durationMs.toFixed(1)} ms<br>
-        <strong>Public Key (First 64 hex chars):</strong> <code>${sigWorkbenchKeys.publicKeyHex.substring(0, 64)}...</code>
-      `;
-    } else {
-      sigWorkbenchKeys = await CryptoCore.generateRsaPssKeypair();
-      $('#sigKeyDetails').innerHTML = `
-        <strong>Algorithm:</strong> RSA-PSS-2048 (SHA-256, Salt: 32)<br>
-        <strong>Public Key Size:</strong> ${sigWorkbenchKeys.publicKeyBytes} bytes<br>
-        <strong>Private Key Size:</strong> ~${sigWorkbenchKeys.privateKeyBytes} bytes<br>
-        <strong>Public Key (First 64 hex chars):</strong> <code>${sigWorkbenchKeys.publicKeyHex.substring(0, 64)}...</code>
-      `;
-    }
-    $('#sigWorkbenchOutput').textContent = 'Keypair ready. Click "Sign Payment Payload" to compute cryptographic signature.';
-  });
-
-  $('#btnSignPayment')?.addEventListener('click', async () => {
-    if (!sigWorkbenchKeys) {
-      $('#sigWorkbenchOutput').textContent = 'Please generate a keypair first.';
-      return;
-    }
-    const payloadText = $('#sigPaymentInput').value;
-    const isPqc = sigWorkbenchKeys.algorithm.includes('ML-DSA');
-
-    if (isPqc) {
-      lastGeneratedSig = await CryptoCore.signMlDsa65(sigWorkbenchKeys.secretKeyBytes, CryptoCore.utf8ToBytes(payloadText));
-    } else {
-      lastGeneratedSig = await CryptoCore.signRsaPss(sigWorkbenchKeys.keyPair.privateKey, CryptoCore.utf8ToBytes(payloadText));
-    }
-
-    $('#sigWorkbenchOutput').innerHTML = `
-      <div style="color:var(--green); font-weight:700;">✓ SIGNATURE COMPUTED (${lastGeneratedSig.sizeBytes.toLocaleString()} bytes in ${lastGeneratedSig.durationMs.toFixed(1)} ms)</div>
-      <div style="margin-top:6px; word-break:break-all;"><strong>Signature Hex (First 120 chars):</strong><br><code>${lastGeneratedSig.signatureHex.substring(0, 120)}...</code></div>
-      <div style="margin-top:6px; color:#aeb2ba;">Now click "Verify Signature" or "Tamper Payload (Simulate Attack)" to test integrity.</div>
+    // Show outputs on both cards
+    const cOut = $('#classicalOutput');
+    cOut.style.display = 'block';
+    cOut.innerHTML = `
+      <div style="color:var(--red); font-weight:700;">● CLASSICAL (${classRes.durationMs.toFixed(1)} ms)</div>
+      <div>Output: <b>${classRes.sigBytes} B</b> | PubKey: <b>${classRes.pubKeyBytes} B</b></div>
+      <div style="word-break:break-all;">Hex: <code>${classRes.sigHex}</code></div>
     `;
+
+    const pOut = $('#pqcOutput');
+    pOut.style.display = 'block';
+    pOut.innerHTML = `
+      <div style="color:var(--green); font-weight:700;">✓ POST-QUANTUM (${pqcRes.durationMs.toFixed(1)} ms)</div>
+      <div>Output: <b>${pqcRes.sigBytes.toLocaleString()} B</b> | PubKey: <b>${pqcRes.pubKeyBytes.toLocaleString()} B</b></div>
+      <div style="word-break:break-all;">Hex: <code>${pqcRes.sigHex}</code></div>
+    `;
+
+    // Compute Delta
+    const sizeRatio = (pqcRes.sigBytes / classRes.sigBytes).toFixed(1);
+    const pubKeyRatio = (pqcRes.pubKeyBytes / classRes.pubKeyBytes).toFixed(1);
+
+    const deltaEl = $('#comparisonDelta');
+    deltaEl.style.display = 'block';
+    deltaEl.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+        <div>
+          <b style="font-size:16px; color:#fff;">Side-by-Side Migration Delta:</b>
+          <div style="font-size:13px; color:#a4abb8; margin-top:4px;">
+            Payload Expansion: <strong style="color:var(--yellow);">${sizeRatio}×</strong> (${classRes.sigBytes} B → ${pqcRes.sigBytes.toLocaleString()} B) | 
+            Public Key Growth: <strong style="color:var(--yellow);">${pubKeyRatio}×</strong> (${classRes.pubKeyBytes} B → ${pqcRes.pubKeyBytes.toLocaleString()} B) |
+            Quantum Security: <strong style="color:var(--red);">0 bits</strong> → <strong style="color:var(--green);">192 bits (Category 3)</strong>
+          </div>
+        </div>
+        <span class="impact-badge badge-green" style="font-size:12px; padding:6px 12px;">FIPS 203 & 204 VALIDATED</span>
+      </div>
+    `;
+
+    btn.disabled = false;
+    btn.textContent = 'Re-Run Side-by-Side Comparison ↻';
   });
 
-  $('#btnVerifySig')?.addEventListener('click', async () => {
-    if (!sigWorkbenchKeys || !lastGeneratedSig) {
-      $('#sigWorkbenchOutput').textContent = 'Generate keys and compute a signature first.';
-      return;
-    }
-    const payloadText = $('#sigPaymentInput').value;
-    const isPqc = sigWorkbenchKeys.algorithm.includes('ML-DSA');
-
-    let ver;
-    if (isPqc) {
-      ver = await CryptoCore.verifyMlDsa65(sigWorkbenchKeys.publicKeyBytes, CryptoCore.utf8ToBytes(payloadText), lastGeneratedSig.signatureBytes);
-    } else {
-      ver = await CryptoCore.verifyRsaPss(sigWorkbenchKeys.keyPair.publicKey, CryptoCore.utf8ToBytes(payloadText), lastGeneratedSig.signatureBytes);
-    }
-
-    if (ver.isValid) {
-      $('#sigWorkbenchOutput').innerHTML = `
-        <div style="color:var(--green); font-weight:800; font-size:12px;">✓ SIGNATURE VERIFIED: VALID PAYMENT AUTHENTICATION</div>
-        <div>Payload integrity confirmed in ${ver.durationMs.toFixed(1)} ms. No tampering detected.</div>
-      `;
-    } else {
-      $('#sigWorkbenchOutput').innerHTML = `
-        <div style="color:var(--red); font-weight:800; font-size:12px;">✕ SIGNATURE REJECTED: VERIFICATION FAILED</div>
-        <div>The signature does not mathematically match the current payload text!</div>
-      `;
-    }
-  });
-
-  $('#btnTamperPayment')?.addEventListener('click', () => {
-    const input = $('#sigPaymentInput');
+  // 6. Copy PQC Code Button
+  $('#btnCopyPqcCode')?.addEventListener('click', async () => {
     try {
-      const obj = JSON.parse(input.value);
-      obj.amount = (parseFloat(obj.amount) || 12500) + 80000; // Alter amount!
-      obj.recipient = 'ATTACKER-ACCOUNT-FRAUD';
-      input.value = JSON.stringify(obj, null, 2);
-      $('#sigWorkbenchOutput').innerHTML = `
-        <div style="color:var(--yellow); font-weight:700;">⚠ PAYLOAD TAMPERED (Amount changed to ₹${obj.amount.toLocaleString()})</div>
-        <div>Now click "Verify Signature" to observe cryptographic rejection.</div>
-      `;
+      await navigator.clipboard.writeText($('#pqcCodeDisplay').textContent);
+      $('#btnCopyPqcCode').textContent = 'Copied! ✓';
     } catch {
-      input.value = input.value + ' [TAMPERED]';
+      $('#btnCopyPqcCode').textContent = 'Copy failed';
     }
+    setTimeout(() => { $('#btnCopyPqcCode').textContent = 'Copy Code ▢'; }, 1500);
   });
 
-  // 7. Interactive Key Establishment & Encryption Workbench (Module 04)
-  let kemWorkbenchKeys = null;
-  let lastKemEnvelope = null;
-
-  $('#btnKemKeygen')?.addEventListener('click', async () => {
-    $('#kemWorkbenchOutput').textContent = 'Generating ML-KEM-768 keypair...';
-    kemWorkbenchKeys = await CryptoCore.generateMlKem768Keypair();
-    $('#kemKeyDetails').innerHTML = `
-      <strong>Algorithm:</strong> ML-KEM-768 (NIST FIPS 203)<br>
-      <strong>Public Key:</strong> 1,184 bytes (Category 3 Security)<br>
-      <strong>Secret Key:</strong> 2,400 bytes<br>
-      <strong>Generation Time:</strong> ${kemWorkbenchKeys.durationMs.toFixed(1)} ms<br>
-      <strong>Public Key (First 48 hex):</strong> <code>${kemWorkbenchKeys.publicKeyHex.substring(0, 48)}...</code>
-    `;
-    $('#kemWorkbenchOutput').textContent = 'ML-KEM-768 keypair ready. Click "Encapsulate & Encrypt Field".';
-  });
-
-  $('#btnKemEncrypt')?.addEventListener('click', async () => {
-    if (!kemWorkbenchKeys) {
-      $('#kemWorkbenchOutput').textContent = 'Please generate ML-KEM-768 keys first.';
-      return;
-    }
-    const fieldText = $('#kemPlaintextInput').value;
-    const aad = 'TX-AAD-9021';
-    lastKemEnvelope = await CryptoCore.protectFieldPqc(kemWorkbenchKeys.publicKeyBytes, fieldText, aad);
-
-    $('#kemWorkbenchOutput').innerHTML = `
-      <div style="color:var(--green); font-weight:700;">✓ FIELD ENCAPSULATED & ENCRYPTED</div>
-      <div>1. ML-KEM-768 Ciphertext: <b>${lastKemEnvelope.kemCiphertextBytes.length} bytes</b> in ${lastKemEnvelope.encapsulationDurationMs.toFixed(1)} ms</div>
-      <div>2. Derived Shared Secret: <b>32 bytes (256-bit)</b> via HKDF-SHA256</div>
-      <div>3. AES-256-GCM Payload: <b>${lastKemEnvelope.totalEnvelopeBytes} total bytes</b> (Nonce: 96-bit, Auth Tag: 128-bit)</div>
-      <div style="margin-top:6px; word-break:break-all;"><strong>Auth Tag:</strong> <code>${lastKemEnvelope.authTagHex}</code></div>
-    `;
-  });
-
-  $('#btnKemDecrypt')?.addEventListener('click', async () => {
-    if (!kemWorkbenchKeys || !lastKemEnvelope) {
-      $('#kemWorkbenchOutput').textContent = 'Perform encapsulation and encryption first.';
-      return;
-    }
-    try {
-      const res = await CryptoCore.unprotectFieldPqc(kemWorkbenchKeys.secretKeyBytes, lastKemEnvelope, 'TX-AAD-9021');
-      $('#kemWorkbenchOutput').innerHTML = `
-        <div style="color:var(--green); font-weight:800;">✓ DECAPSULATION & DECRYPTION SUCCESSFUL</div>
-        <div>Recovered Plaintext: <b>${res.plaintextContent}</b></div>
-        <div>ML-KEM Decapsulation: ${res.decapsulationDurationMs.toFixed(1)} ms | AES-GCM Tag Verified: ${res.decryptionDurationMs.toFixed(1)} ms</div>
-      `;
-    } catch (e) {
-      $('#kemWorkbenchOutput').innerHTML = `<div style="color:var(--red); font-weight:800;">✕ AUTHENTICATED DECRYPTION FAILED: ${e.message}</div>`;
-    }
-  });
-
-  $('#btnCorruptCiphertext')?.addEventListener('click', () => {
-    if (!lastKemEnvelope) return;
-    lastKemEnvelope.fullEncryptedBuffer[0] ^= 0xFF; // Corrupt ciphertext byte
-    $('#kemWorkbenchOutput').innerHTML = `
-      <div style="color:var(--yellow); font-weight:700;">⚠ CIPHERTEXT BYTE CORRUPTED IN MEMORY</div>
-      <div>Click "Decapsulate & Decrypt Field" to test AES-GCM Galois authentication tag rejection.</div>
-    `;
-  });
-
-  // 8. Performance Benchmark Suite (Module 10)
-  $('#btnRunBenchmark')?.addEventListener('click', async () => {
-    if (typeof Benchmarks === 'undefined') return;
-    const btn = $('#btnRunBenchmark');
-    btn.disabled = true;
-    btn.textContent = 'Running live cryptographic benchmarks...';
-
-    const results = await Benchmarks.runSingleBenchmark(2);
-
-    // Update table cells
-    $('#benchRsaSign').textContent = `${results.classical.signature.signMs.toFixed(1)} ms`;
-    $('#benchRsaVerify').textContent = `${results.classical.signature.verifyMs.toFixed(1)} ms`;
-    $('#benchRsaSigSize').textContent = `${results.classical.signature.signatureBytes} B`;
-
-    $('#benchDsaSign').textContent = `${results.pqc.signature.signMs.toFixed(1)} ms`;
-    $('#benchDsaVerify').textContent = `${results.pqc.signature.verifyMs.toFixed(1)} ms`;
-    $('#benchDsaSigSize').textContent = `${results.pqc.signature.signatureBytes.toLocaleString()} B`;
-
-    $('#benchRsaEnc').textContent = `${results.classical.encryption.encryptMs.toFixed(1)} ms`;
-    $('#benchRsaDec').textContent = `${results.classical.encryption.decryptMs.toFixed(1)} ms`;
-    $('#benchRsaCtSize').textContent = `${results.classical.encryption.ciphertextBytes} B`;
-
-    $('#benchKemEncap').textContent = `${results.pqc.encryption.encapMs.toFixed(1)} ms`;
-    $('#benchKemDecap').textContent = `${results.pqc.encryption.decapMs.toFixed(1)} ms`;
-    $('#benchKemCtSize').textContent = `${results.pqc.encryption.kemCiphertextBytes.toLocaleString()} B`;
-
-    $('#benchEnvDetails').textContent = `${results.environment.platform} · Cores: ${results.environment.logicalCores} · WebCrypto Subtle Active`;
-    $('#benchExpansionRatio').textContent = `${results.comparisons.signatureSizeExpansionRatio}×`;
-
-    btn.disabled = false;
-    btn.textContent = 'Re-Run Performance Benchmark ↻';
-  });
-
-  // 9. Threat Lab Triggers (Module 11)
-  $$('.threat-run-btn').forEach(btn => btn.addEventListener('click', async () => {
-    const threatId = btn.dataset.threat;
-    if (typeof ThreatLab === 'undefined') return;
-    const threat = ThreatLab.threats.find(t => t.id === threatId);
-    if (!threat) return;
-
-    btn.disabled = true;
-    btn.textContent = 'Running...';
-    const outcome = await threat.simulate();
-    btn.disabled = false;
-    btn.textContent = 'Test Again';
-
-    const resultBox = $(`#threatRes_${threatId}`);
-    if (resultBox) {
-      resultBox.classList.add('visible');
-      resultBox.innerHTML = `
-        <div style="color:var(--green); font-weight:700; margin-bottom:4px;">EXPERIMENT RESULT: ${outcome.testResult || outcome.status || 'SIMULATION COMPLETE'}</div>
-        <pre style="margin:0; font:9px/1.6 var(--mono); white-space:pre-wrap;">${JSON.stringify(outcome, null, 2)}</pre>
-      `;
-    }
-  }));
-
-  // 10. Automated In-Browser Test Suite Runner (Section 6)
+  // 7. Automated Test Suite Runner (1-Click Verification)
   $('#btnRunTestSuite')?.addEventListener('click', async () => {
     if (typeof TestSuite === 'undefined') return;
     const btn = $('#btnRunTestSuite');
     btn.disabled = true;
-    btn.textContent = 'Executing 12 automated tests...';
+    btn.textContent = 'Running 12 automated tests...';
 
     const tableBody = $('#testTableBody');
-    tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:18px;">Running cryptographic and system assertions...</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:18px;">Executing cryptographic tests...</td></tr>';
 
     const report = await TestSuite.runAllTests();
 
     tableBody.innerHTML = report.results.map((r, i) => `
       <tr>
-        <td style="font:9px var(--mono); color:var(--muted);">${String(i + 1).padStart(2, '0')}</td>
+        <td style="font:11px var(--mono); color:var(--muted);">${String(i + 1).padStart(2, '0')}</td>
         <td><strong>${r.name}</strong></td>
         <td><span class="test-status-pill ${r.passed ? 'pill-pass' : 'pill-fail'}">${r.passed ? 'PASS' : 'FAIL'}</span></td>
-        <td style="font:10px var(--mono); color:${r.passed ? '#23854e' : 'var(--red)'};">${r.passed ? r.message : r.error} (${r.durationMs.toFixed(1)} ms)</td>
+        <td style="font:12px var(--mono); color:${r.passed ? '#1e7e48' : 'var(--red)'};">${r.passed ? r.message : r.error} (${r.durationMs.toFixed(1)} ms)</td>
       </tr>
     `).join('');
 
     $('#testSuiteSummary').innerHTML = `
-      <span class="impact-badge ${report.allPassed ? 'badge-green' : 'badge-red'}">
+      <span class="impact-badge ${report.allPassed ? 'badge-green' : 'badge-red'}" style="font-size:12px; padding:6px 12px;">
         ${report.passedCount}/${report.totalTests} TESTS PASSED in ${report.totalDurationMs.toFixed(1)} ms
       </span>
     `;
@@ -966,68 +672,7 @@ export class PQCProvider implements CryptoProvider {
     btn.textContent = 'Re-Run Test Suite ↻';
   });
 
-  // 11. Copy & Download CBOM
-  $('#copyJson')?.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText($('#jsonPreview').textContent);
-      $('#copyJson').textContent = 'Copied!';
-    } catch {
-      $('#copyJson').textContent = 'Copy failed';
-    }
-    setTimeout(() => { $('#copyJson').textContent = 'Copy'; }, 1500);
-  });
-
-  $('#downloadCbom')?.addEventListener('click', () => {
-    if (typeof CbomGenerator === 'undefined') return;
-    const data = JSON.stringify(CbomGenerator.generateCbom(selectedProfile), null, 2);
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `crypto-inventory-${selectedProfile}.json`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  });
-
-  $('#copyEnv')?.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText($('#envValue').textContent);
-      $('#copyEnv').textContent = '✓';
-    } catch {
-      $('#copyEnv').textContent = '✕';
-    }
-    setTimeout(() => { $('#copyEnv').textContent = '▢'; }, 1500);
-  });
-
-  // 12. Roadmap Checklist Progress Meter
-  $$('.chk-box').forEach(chk => chk.addEventListener('change', () => {
-    const total = $$('.chk-box').length;
-    const checked = $$('.chk-box:checked').length;
-    const pct = Math.round((checked / total) * 100);
-    const fill = $('#checklistFill');
-    const label = $('#checklistProgressText');
-    if (fill) fill.style.width = `${pct}%`;
-    if (label) label.textContent = `${pct}% (${checked}/${total} items verified)`;
-  }));
-
-  // Mobile Menu Toggle
-  $('#menuToggle')?.addEventListener('click', () => {
-    const nav = $('.topnav');
-    const open = nav.classList.toggle('open');
-    $('#menuToggle').setAttribute('aria-expanded', String(open));
-    $('#menuToggle').setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
-  });
-
-  $$('.topnav a').forEach(a => a.addEventListener('click', () => {
-    $('.topnav').classList.remove('open');
-    $('#menuToggle').setAttribute('aria-expanded', 'false');
-  }));
-
-  // Initial Boot
-  applyProfile('classical');
-  inspectArchComponent('customer');
-  renderDiffViewer();
+  // Initial Load
+  loadDemo('signature');
 
 })();

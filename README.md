@@ -1,62 +1,38 @@
-# CryptoShift Lab — Post-Quantum Banking Cryptography Platform
+# CryptoShift Lab — Classical to Post-Quantum Cryptography Migration Lab
 
-An interactive, technically accurate educational and demonstration platform explaining the complete end-to-end migration of a banking payment system from classical cryptography (RSA-2048, ECC, SHA-256) to post-quantum cryptography (NIST FIPS 203 ML-KEM-768 and NIST FIPS 204 ML-DSA-65).
-
-The lab demonstrates not merely algorithm substitution, but the full architectural, software, cryptographic, protocol, infrastructure, database, performance, security and compliance changes involved in modernizing banking systems for the quantum era.
+An interactive, dual-card developer lab demonstrating how classical cryptography algorithms migrate to post-quantum cryptography (PQC) with live demo code and in-browser execution.
 
 ---
 
-## Key Features & Migration Modules
+## What the Lab Does
 
-- **Central Profile Switcher**: Toggle between **`CLASSICAL`**, **`HYBRID`**, and **`PQC`** profiles. Changing the posture instantly updates the architecture diagram, algorithm matrix, payment pipeline, impact report, benchmarks, and CBOM.
-- **Change Impact Report**: Automated real-time analysis categorized into:
-  - **CHANGED**: Components requiring algorithm, code, key, or protocol replacement.
-  - **RETAINED**: Symmetric ciphers (AES-256-GCM) and hash functions (SHA-256/384) that remain quantum-safe.
-  - **REQUIRES COMPATIBILITY WORK**: HSM/KMS hardware tokens, clearing networks (SWIFT/ISO 20022), and CA certificate chains.
-- **Module 01 — Classical Banking Architecture**: Interactive clickable 8-step payment pipeline (Customer → Mobile App → API Gateway → Auth Service → Payment Service → Crypto Provider → Database → Banking Partner) with a component inspector.
-- **Module 02 — Algorithm Transformation Matrix**: In-depth side-by-side comparison across signatures, key establishment, and symmetric primitives.
-- **Module 03 — Digital Signature Migration Workbench**: Real in-browser key generation, canonical JSON payment signing, signature verification, and a "Tamper Payload (Simulate Fraud)" attack button demonstrating real FIPS 204 mathematical rejection.
-- **Module 04 — Key Establishment & Encryption Workbench**: Real ML-KEM-768 key encapsulation, HKDF-SHA256 key derivation, AES-256-GCM authenticated encryption with 96-bit unique nonces and AAD, plus bit-corruption rejection tests.
-- **Module 05 — TLS, Certificates & PKI**: Protocol handshake breakdown, certificate chain size inflation, TCP packet fragmentation, and CA readiness.
-- **Module 06 — Application Architecture & Agility Seam**: Interactive multi-tab code viewer (`PaymentController.ts`, `CryptoProvider.ts`, `ClassicalProvider.ts`, `HybridProvider.ts`, `PQCProvider.ts`).
-- **Module 07 — Key Management & HSM / KMS**: Compatibility matrix for Thales, Utimaco, AWS KMS, Google Cloud KMS, and Azure Key Vault with FIPS 140-3 readiness disclosures.
-- **Module 08 — Database & Data Migration**: Key rewrapping vs bulk re-encryption analysis and long-term RFC 3161 PQC signature timestamping.
-- **Module 09 — Cryptographic Inventory & CycloneDX 1.6 CBOM**: Dynamic CBOM generation with live 12-rule schema validation and strict zero-private-key leak enforcement.
-- **Module 10 — Performance & Infrastructure Benchmark**: In-browser benchmarking engine measuring actual execution times (ms), key sizes, and signature expansion ratios (12.9×).
-- **Module 11 — Security Threat Laboratory**: 10 interactive experiments clearly distinguishing real cryptographic tests from educational threat simulations (HNDL, Shor's factoring, downgrade attacks, algorithm substitution).
-- **Module 12 — Practical 12-Phase Roadmap & Checklist**: Complete migration lifecycle with an interactive 10-item compliance readiness checklist and progress meter.
-- **Automated Test Suite**: 12 comprehensive unit and integration tests executable both in-browser and via Node CLI (`npm test`).
-
----
-
-## Technical Architecture & Standards
-
-- **NIST FIPS 203**: Module-Lattice-Based Key-Encapsulation Mechanism (ML-KEM-768, Category 3).
-- **NIST FIPS 204**: Module-Lattice-Based Digital Signature Standard (ML-DSA-65, Category 3).
-- **NIST SP 800-38D**: Galois/Counter Mode (AES-256-GCM) with 96-bit unique nonces and 128-bit authentication tags.
-- **RFC 5869**: HMAC-based Extract-and-Expand Key Derivation Function (HKDF-SHA-256).
-- **CycloneDX 1.6**: Cryptographic Bill of Materials (CBOM) specification with cryptographic asset extensions.
-- **Zero Runtime Dependencies**: Completely pre-bundled and static. Uses W3C Web Cryptography API (`crypto.subtle`) and the audited `@noble/post-quantum` library.
+- **Dual-Card Interactive Code Migration**:
+  - **Card 1 (Classical Code AS-IS)**: An editable code card with preloaded classical cryptography code (or where users can paste their own custom code). Displays mathematical foundations, key sizes, output sizes, and quantum risk ratings.
+  - **Card 2 (Post-Quantum Code TO-BE)**: Displays the exact transformed PQC code (NIST FIPS 203 ML-KEM-768, FIPS 204 ML-DSA-65, AES-256-GCM, and Hybrid TLS). Displays lattice parameters, expanded key sizes, and quantum hardness levels.
+- **Side-by-Side Execution & Delta Analysis**:
+  - Execute either card individually or click **"Execute Both & Compare Side-by-Side ⚡"** to benchmark wall-clock durations, payload growth ($12.9\times$ for signatures), and quantum security bits ($0 \rightarrow 192$ bits) using real in-browser WebCrypto and `@noble/post-quantum`.
+- **Pre-Loaded Migration Scenarios**:
+  1. **Payment Digital Signature**: `RSA-PSS-2048` $\rightarrow$ `NIST FIPS 204 ML-DSA-65`
+  2. **Field Encryption**: `RSA-OAEP-2048` $\rightarrow$ `NIST FIPS 203 ML-KEM-768 + HKDF + AES-256-GCM`
+  3. **Transport Security**: `TLS 1.3 ECDH P-256` $\rightarrow$ `Hybrid X25519MLKEM768 Key Exchange`
+  4. **Software Architecture**: `Hardcoded Classical Coupling` $\rightarrow$ `CryptoProvider Agility Seam`
+  5. **Database Envelope Migration**: `Classical KEK Wrapping` $\rightarrow$ `ML-KEM DEK Rewrapping (Zero Bulk Re-encryption)`
+- **The 4 Migration Rules Cheat Sheet**:
+  - Quick reference explaining asymmetric replacement vs symmetric retention.
+- **Automated Verification Test Suite**:
+  - 12 real unit tests runnable directly in the browser and via Node CLI (`npm test`).
 
 ---
 
 ## Local Development & Testing
 
-### Running Tests (Node CLI)
-To run the automated cryptographic and system test suite:
-
 ```bash
+# Run automated test suite
 npm test
-```
 
-### Running Locally
-Open `index.html` directly in any modern browser, or launch a local static server:
-
-```bash
-# Python
+# Run locally in browser
 python -m http.server 8000
-
-# Node
+# or
 npx serve .
 ```
 
@@ -66,18 +42,4 @@ Visit `http://localhost:8000`.
 
 ## Deployment to Vercel
 
-This repository is optimized for zero-configuration static deployment on Vercel:
-
-1. Push files to your Git repository.
-2. Import the project into Vercel.
-3. Select **Other** as the framework preset.
-4. Set Build Command to **None** (or leave empty) and Output Directory to `.`.
-5. Deploy.
-
-The included `vercel.json` applies strict security headers (`nosniff`, `strict-origin-when-cross-origin`, `DENY` clickjacking protection).
-
----
-
-## Implementation Report
-
-For a complete breakdown of implemented primitives, validation results, educational simulations, platform limitations, and enterprise banking integration requirements, refer to [IMPLEMENTATION_REPORT.md](IMPLEMENTATION_REPORT.md).
+Configured for static deployment on Vercel with zero build step. All dependencies are pre-bundled in `js/lib/noble-pqc.bundle.js`. Security headers are defined in `vercel.json`.
