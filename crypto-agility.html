@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="description" content="In-depth guide and interactive architectural sandbox for enterprise Cryptographic Agility in post-quantum banking systems." />
+  <title>Cryptographic Agility in Depth — CryptoShift Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- Top Navigation -->
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="CryptoShift Lab home">
+      <span class="brand-mark">C<span>.</span></span>
+      <span>CRYPTOSHIFT <small>PQC CODE MIGRATION LAB</small></span>
+    </a>
+    <nav class="topnav" aria-label="Main navigation">
+      <a href="index.html">Interactive Lab</a>
+      <a href="cbom.html">CBOM (CycloneDX 1.6)</a>
+      <a href="crypto-agility.html" class="active">Crypto-Agility Architecture</a>
+      <a href="https://github.com/quantumastra-deeptech/pqc-lab" target="_blank" rel="noopener">GitHub ↗</a>
+    </nav>
+    <a class="top-cta" href="#sandbox">Try Agile Seam <span>↓</span></a>
+  </header>
+
+  <main id="main">
+    <!-- Hero / Headline -->
+    <section class="hero-simple shell">
+      <div class="eyebrow"><span class="pulse"></span> SOFTWARE ARCHITECTURE · NIST FIPS 203 & 204 · ZERO DOWNTIME</div>
+      <h1>Cryptographic Agility in Depth.<br><span class="highlight">Architecting Systems that Outlive Algorithms.</span></h1>
+      <p class="hero-lede">
+        Replacing hardcoded RSA with hardcoded ML-KEM is not agility—it is merely swapping today’s technical debt for post-quantum technical debt. Learn how to decouple payment business logic, migrate databases without re-encrypting petabytes of records, and switch cryptographic algorithms at runtime with zero downtime.
+      </p>
+    </section>
+
+    <!-- Section 1: What is Crypto-Agility? -->
+    <section class="guide-section shell" id="what-is-agility">
+      <div class="guide-head">
+        <span class="mod-num">ARCHITECTURAL PARADIGM</span>
+        <h2>01 · What is Cryptographic Agility?</h2>
+        <p class="guide-lede">
+          <strong>Cryptographic Agility</strong> is the architectural capability of a system to evolve, substitute, or reconfigure its cryptographic algorithms, primitives, key sizes, and protocols without altering business logic, invalidating persistent data, or requiring risky, system-wide refactoring.
+        </p>
+      </div>
+
+      <div class="guide-grid-3">
+        <div class="guide-card">
+          <div class="guide-card-icon">🔌</div>
+          <h3>Interface Decoupling</h3>
+          <p>
+            Business applications consume an abstract cryptographic interface (e.g. <code>CryptoProvider</code>) rather than binding directly to concrete mathematical implementations (like WebCrypto SubtleCrypto or OpenSSL).
+          </p>
+          <div class="guide-card-tag">SEAM PATTERN</div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-icon">🏷️</div>
+          <h3>Algorithm Tagging</h3>
+          <p>
+            Payloads, stored ciphertexts, and digital signatures carry standardized algorithm identifiers and OIDs in their metadata envelope. Verifiers know exactly which algorithm to invoke at runtime.
+          </p>
+          <div class="guide-card-tag">ENVELOPE METADATA</div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-icon">🎛️</div>
+          <h3>Dynamic Policy Control</h3>
+          <p>
+            Algorithm selection, minimum security strength (e.g. 192-bit NIST Level 3), and deprecation kill-switches are driven by centralized, reloadable configuration rather than hardcoded source code.
+          </p>
+          <div class="guide-card-tag">RUNTIME CONFIGURATION</div>
+        </div>
+      </div>
+
+      <!-- Comparative Architecture Table -->
+      <div style="margin-top: 36px;">
+        <h3 style="font-size: 20px; letter-spacing: -.4px; margin-bottom: 12px;">Rigid Legacy Anti-Pattern vs Modern Crypto-Agile Architecture</h3>
+        <div class="compare-table-wrap">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th style="width:20%;">ASPECT</th>
+                <th style="width:40%;">RIGID ANTI-PATTERN (LEGACY)</th>
+                <th style="width:40%;">CRYPTO-AGILE ARCHITECTURE (PQC-READY)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Code Coupling</strong></td>
+                <td>Direct calls to <code>crypto.subtle.sign("RSA-PSS", ...)</code> scattered across 50+ controllers.</td>
+                <td>Controllers call <code>provider.signPayment(payload)</code> via dependency injection. Zero algorithm names in controllers.</td>
+              </tr>
+              <tr>
+                <td><strong>Payload Formats</strong></td>
+                <td>Raw binary or base64 signature assumed to always fit in 256 bytes.</td>
+                <td>Structured envelopes with <code>algorithm</code>, <code>keyId</code>, <code>signature</code>, and <code>timestamp</code> tags.</td>
+              </tr>
+              <tr>
+                <td><strong>Buffer & Schema Sizing</strong></td>
+                <td>Fixed database columns (<code>VARCHAR(256)</code>) and tight network buffer caps.</td>
+                <td>Dynamic buffer allocation accommodating ML-DSA-65 signatures (3,309 B) and ML-KEM-768 ciphertexts (1,088 B).</td>
+              </tr>
+              <tr>
+                <td><strong>Database Migration</strong></td>
+                <td>Must decrypt and re-encrypt hundreds of millions of table rows when ciphers change.</td>
+                <td><strong>Envelope Encryption:</strong> Rows encrypted with symmetric DEKs (AES-256). Only the KEK wrapped with ML-KEM is re-wrapped.</td>
+              </tr>
+              <tr>
+                <td><strong>Emergency Response</strong></td>
+                <td>Requires emergency code rebuilds, testing, regression sweeps, and production hotfixes (weeks).</td>
+                <td>Instantly swap algorithms or fallback via remote policy flags in minutes with zero code deployments.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Why is Crypto-Agility Critical for PQC? -->
+    <section class="guide-section shell" id="why-agility">
+      <div class="guide-head">
+        <span class="mod-num">WHY AGILITY IS VITAL</span>
+        <h2>02 · Why is Crypto-Agility Critical for the PQC Transition?</h2>
+        <p class="guide-lede">
+          The shift from classical to post-quantum cryptography is not a single weekend migration. It is an evolving, multi-year transition marked by dual interoperability and evolving standards.
+        </p>
+      </div>
+
+      <div class="guide-grid-2">
+        <div class="guide-card">
+          <div class="guide-card-icon">🧬</div>
+          <h3>1. Evolving NIST Standardization Timeline</h3>
+          <p>
+            In August 2024, NIST finalized FIPS 203 (ML-KEM) and FIPS 204 (ML-DSA). However, NIST is actively standardizing Round 4/5 backup algorithms (such as BIKE, HQC) and on-ramp digital signature algorithms to mitigate lattice-specific cryptanalysis risks. If an enterprise hardcodes ML-DSA-65 today, it will face the exact same painful refactoring when secondary standards arrive.
+          </p>
+          <div class="guide-card-tag">STANDARDS DYNAMICS</div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-icon">🤝</div>
+          <h3>2. Multi-Year Hybrid Interoperability</h3>
+          <p>
+            Global payment rails (SWIFT, ISO 20022, Fedwire, ACH) will migrate at widely differing velocities. A tier-1 bank must simultaneously process RSA-2048 transactions for legacy partners, dual-signed Hybrid transactions for early-adopters, and pure ML-DSA-65 transactions for internal zero-trust zones. Only an agile architecture can dispatch across profiles dynamically.
+          </p>
+          <div class="guide-card-tag">ECOSYSTEM DIVERSITY</div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-icon">⚖️</div>
+          <h3>3. Extreme Key & Signature Size Asymmetry</h3>
+          <p>
+            Classical RSA-2048 produces 256-byte signatures. NIST FIPS 204 ML-DSA-65 produces <strong>3,309-byte signatures (12.9× growth)</strong> and <strong>1,952-byte public keys (7.6× growth)</strong>. Systems with hardcoded memory buffers, rigid API gateway header limits (e.g. 8KB HTTP request header limits), or fixed SQL columns will crash under PQC payloads without agile design.
+          </p>
+          <div class="guide-card-tag">RESOURCE EXPANSION</div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-icon">🛡️</div>
+          <h3>4. Rapid Algorithmic Kill-Switches</h3>
+          <p>
+            If a mathematical vulnerability is published against a specific lattice parameter, or if a hardware acceleration side-channel compromises a deployed implementation, an agile architecture allows CISOs to deprecate the vulnerable algorithm and reroute traffic via centralized policy within minutes.
+          </p>
+          <div class="guide-card-tag">DISASTER RECOVERY</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: The 5 Pillars of Enterprise Crypto-Agility -->
+    <section class="guide-section shell" id="five-pillars">
+      <div class="guide-head">
+        <span class="mod-num">CORE ARCHITECTURE</span>
+        <h2>03 · The 5 Core Pillars of Crypto-Agile Engineering</h2>
+        <p class="guide-lede">
+          Implementing true cryptographic agility requires isolating algorithms across software, data storage, network transport, hardware security modules, and runtime governance.
+        </p>
+      </div>
+
+      <div class="guide-grid-3">
+        <div class="guide-card">
+          <div class="guide-card-icon">🧱</div>
+          <h3>Pillar 1 · Software Seam (Provider Pattern)</h3>
+          <p>
+            Extract all cryptographic operations into an interface contract: <code>CryptoProvider</code>. Payment services execute <code>sign()</code>, <code>verify()</code>, and <code>protectField()</code> without ever knowing whether RSA, ML-DSA, or Hybrid algorithms execute underneath.
+          </p>
+          <div class="guide-card-tag">CODE SEPARATION</div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-icon">🗄️</div>
+          <h3>Pillar 2 · Data Envelope Agility</h3>
+          <p>
+            Never directly encrypt database records with asymmetric public keys! Protect records using symmetric Data Encryption Keys (DEKs, AES-256-GCM). Protect the DEKs using Key Encryption Keys (KEKs) wrapped with ML-KEM-768. To migrate, you only re-wrap the KEK, leaving petabytes of data untouched.
+          </p>
+          <div class="guide-card-tag">ZERO BULK RE-ENCRYPTION</div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-icon">🌐</div>
+          <h3>Pillar 3 · Network & Protocol Agility</h3>
+          <p>
+            Deploy TLS 1.3 with hybrid key exchange (<code>X25519MLKEM768</code>). The edge reverse proxy negotiates quantum-safe transport with supporting clients while cleanly falling back to classical ECDH for legacy mobile apps, completely transparent to application microservices.
+          </p>
+          <div class="guide-card-tag">TRANSPORT LAYER</div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-icon">🔑</div>
+          <h3>Pillar 4 · HSM & KMS Poly-Key Abstraction</h3>
+          <p>
+            Tag all cryptographic keys with rich metadata: <code>KeyID</code>, <code>AlgorithmOID</code>, <code>Epoch</code>, and <code>Purpose</code>. Abstract hardware interfaces so applications can route legacy RSA ops to physical PKCS#11 HSMs and PQC ops to post-quantum KMS services.
+          </p>
+          <div class="guide-card-tag">KEY MANAGEMENT</div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-icon">📋</div>
+          <h3>Pillar 5 · Centralized Policy Governance</h3>
+          <p>
+            Maintain cryptographic policy in machine-readable configuration (e.g. JSON or YAML). Specify minimum classical bits, allowed NIST quantum security levels (0–5), and deprecation dates. Systems validate cryptographic operations against this policy at runtime.
+          </p>
+          <div class="guide-card-tag">RUNTIME GOVERNANCE</div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-icon">📊</div>
+          <h3>Continuous CBOM Telemetry</h3>
+          <p>
+            Continuously emit CycloneDX 1.6 Cryptographic Bills of Materials from running applications. Any service utilizing an unapproved, hardcoded, or deprecated algorithm triggers an immediate CI/CD pipeline failure.
+          </p>
+          <div class="guide-card-tag">OBSERVABILITY</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Step-by-Step Implementation Playbook -->
+    <section class="guide-section shell" id="playbook">
+      <div class="guide-head">
+        <span class="mod-num">ENGINEERING PLAYBOOK</span>
+        <h2>04 · Step-by-Step Crypto-Agility Migration Playbook</h2>
+        <p class="guide-lede">
+          How engineering teams execute the transition from rigid classical bindings to a modular, post-quantum agile architecture in 5 phases.
+        </p>
+      </div>
+
+      <div class="step-flow">
+        <div class="step-item">
+          <div class="step-badge">01</div>
+          <div class="step-content">
+            <h3>Audit Cryptographic Coupling & Generate Initial CBOM</h3>
+            <p>
+              Search codebases for direct imports of <code>crypto</code>, <code>subtle</code>, <code>BouncyCastle</code>, and <code>java.security</code>. Generate a CycloneDX 1.6 CBOM to locate every hardcoded algorithm, fixed buffer size, and database column limit.
+            </p>
+            <span class="step-meta">GOAL: Zero Undocumented Cryptographic Calls</span>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-badge">02</div>
+          <div class="step-content">
+            <h3>Introduce the Provider Seam & Refactor Controllers</h3>
+            <p>
+              Define the <code>CryptoProvider</code> interface. Wrap existing classical RSA/ECC implementations inside a <code>ClassicalProvider</code>. Update payment controllers to call the provider via dependency injection. Ensure 100% of existing unit tests pass without modifying business logic.
+            </p>
+            <span class="step-meta">GOAL: Clean Architectural Seam Established</span>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-badge">03</div>
+          <div class="step-content">
+            <h3>Expand Payloads, Database Schemas & Transport Buffers</h3>
+            <p>
+              Update database schema columns storing signatures and public keys from fixed <code>VARCHAR(256)</code> to <code>VARCHAR(4096)</code> or binary <code>BLOB</code>. Increase API Gateway HTTP header maximums from 8KB to 16KB to accommodate post-quantum client certificates.
+            </p>
+            <span class="step-meta">GOAL: Infrastructure Ready for 12.9× Payload Growth</span>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-badge">04</div>
+          <div class="step-content">
+            <h3>Implement Hybrid Interoperability & Envelope Encryption</h3>
+            <p>
+              Deploy a <code>HybridProvider</code> that produces dual signatures (RSA-PSS + ML-DSA-65) and hybrid KEM encapsulation. Migrate database records to Envelope Encryption with DEK/KEK separation, allowing instantaneous KEK re-wrapping.
+            </p>
+            <span class="step-meta">GOAL: Zero Bulk Re-encryption & Full Backward Compatibility</span>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-badge">05</div>
+          <div class="step-content">
+            <h3>Deploy PQC Provider & Activate Deprecation Kill-Switches</h3>
+            <p>
+              Roll out the <code>PQCProvider</code> (NIST FIPS 203 ML-KEM-768 and FIPS 204 ML-DSA-65). Set policy to reject legacy RSA signatures on high-value transactions. Maintain emergency fallback kill-switches in centralized configuration.
+            </p>
+            <span class="step-meta">GOAL: Production Quantum-Safe Banking System</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Interactive Crypto-Agility Sandbox -->
+    <section class="guide-section shell" id="sandbox">
+      <div class="guide-head">
+        <span class="mod-num">LIVE ARCHITECTURAL SANDBOX</span>
+        <h2>05 · Interactive CryptoProvider Architectural Seam</h2>
+        <p class="guide-lede">
+          Execute an authentic ISO 20022 banking payment through our live <code>PaymentService</code>. Watch how the business logic code remains <strong>100% identical</strong> while swapping the underlying cryptographic provider between Classical, Hybrid, and Post-Quantum profiles in real time.
+        </p>
+      </div>
+
+      <div class="cbom-workbench">
+        <!-- Visual Flow Diagram -->
+        <div class="agility-diagram-box">
+          <div class="preset-label" style="margin-bottom:14px;">RUNTIME CRYPTO-AGILITY DISPATCH FLOW:</div>
+          <div class="flow-diagram-row">
+            <div class="diagram-node">
+              <strong>1. ISO 20022 Payment</strong>
+              <small>Business Request</small>
+            </div>
+            <div class="diagram-arrow">→</div>
+            <div class="diagram-node active-node">
+              <strong>2. PaymentService</strong>
+              <small>Business Logic (Unchanged)</small>
+            </div>
+            <div class="diagram-arrow">→</div>
+            <div class="diagram-node seam-node">
+              <strong style="color:var(--blue);">3. CryptoProvider Seam</strong>
+              <small>Pluggable Interface</small>
+            </div>
+            <div class="diagram-arrow">→</div>
+            <div class="diagram-node active-node" id="activeProviderNode">
+              <strong id="activeProviderNodeTitle">ClassicalProvider</strong>
+              <small id="activeProviderNodeSub">RSA-PSS-2048 / RSA-OAEP</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls Toolbar -->
+        <div class="cbom-top-bar">
+          <div>
+            <span class="preset-label">SWAP ACTIVE CRYPTOGRAPHIC PROVIDER:</span>
+            <div class="preset-toolbar" style="margin-bottom:0;">
+              <button class="preset-btn active" id="btnAgilityClassical">Classical Provider (RSA-2048)</button>
+              <button class="preset-btn" id="btnAgilityHybrid">Hybrid Provider (Dual RSA + ML-DSA)</button>
+              <button class="preset-btn" id="btnAgilityPqc">PQC Provider (ML-DSA-65 + ML-KEM-768)</button>
+            </div>
+          </div>
+
+          <div>
+            <button class="btn btn-dark" id="btnExecuteAgilePayment">Execute Payment Through Agile Seam ▶</button>
+          </div>
+        </div>
+
+        <!-- KPI Strip -->
+        <div class="kpi-strip">
+          <div class="kpi-card">
+            <div class="kpi-val" id="kpiAgilityCodeStatus" style="color:var(--green);">0 LINES</div>
+            <div class="kpi-lbl">BUSINESS CODE CHANGED</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-val" id="kpiAgilitySigAlgo">RSA-PSS</div>
+            <div class="kpi-lbl">ACTIVE SIGNATURE PRIMITIVE</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-val" id="kpiAgilitySigSize">256 B</div>
+            <div class="kpi-lbl">SIGNATURE OVERHEAD</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-val" id="kpiAgilityQuantumSec" style="color:var(--red);">0 BITS</div>
+            <div class="kpi-lbl">QUANTUM SECURITY LEVEL</div>
+          </div>
+        </div>
+
+        <!-- Execution Results Box -->
+        <div class="json-viewer-wrap" style="margin-top:0;">
+          <div class="json-header">
+            <span id="agilityConsoleTitle">TRANSACTION EXECUTION LOG · PAYMENT SERVICE SEAM</span>
+            <span class="impact-badge badge-blue" id="agilityConsoleStatus">READY</span>
+          </div>
+          <pre class="json-code-box" id="agilityConsoleDisplay">Click "Execute Payment Through Agile Seam ▶" to run an ISO 20022 payment through the active provider in your browser.</pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">C<span>.</span></span>
+      <span>CRYPTOSHIFT <small>PQC CODE MIGRATION LAB</small></span>
+    </a>
+    <span>Educational demo · Static website · NIST FIPS 203 & 204 Standards</span>
+    <a href="#main">Back to top ↑</a>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/lib/noble-pqc.bundle.js"></script>
+  <script src="js/crypto-core.js"></script>
+  <script src="js/providers.js"></script>
+  <script src="js/agility-page.js"></script>
+</body>
+</html>

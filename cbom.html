@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="description" content="Comprehensive Guide & Dynamic Generator for Cryptographic Bill of Materials (CBOM) conforming to CycloneDX 1.6 standards." />
+  <title>CBOM (Cryptographic Bill of Materials) Guide & Generator — CryptoShift Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- Top Navigation -->
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="CryptoShift Lab home">
+      <span class="brand-mark">C<span>.</span></span>
+      <span>CRYPTOSHIFT <small>PQC CODE MIGRATION LAB</small></span>
+    </a>
+    <nav class="topnav" aria-label="Main navigation">
+      <a href="index.html">Interactive Lab</a>
+      <a href="cbom.html" class="active">CBOM (CycloneDX 1.6)</a>
+      <a href="crypto-agility.html">Crypto-Agility Architecture</a>
+      <a href="https://github.com/quantumastra-deeptech/pqc-lab" target="_blank" rel="noopener">GitHub ↗</a>
+    </nav>
+    <a class="top-cta" href="#workbench">Generate CBOM <span>↓</span></a>
+  </header>
+
+  <main id="main">
+    <!-- Hero / Headline -->
+    <section class="hero-simple shell">
+      <div class="eyebrow"><span class="pulse"></span> NIST SP 800-219 · CYCLONEDX 1.6 SPECIFICATION · REGULATORY COMPLIANCE</div>
+      <h1>Cryptographic Bill of Materials.<br><span class="highlight">Discovery, Quantum Risk & Compliance.</span></h1>
+      <p class="hero-lede">
+        A standardized, verifiable, machine-readable inventory of every cryptographic algorithm, key length, protocol, certificate, and library across your enterprise payment systems. Learn the architecture, regulatory mandates, and generate validated CycloneDX 1.6 CBOMs in real time.
+      </p>
+    </section>
+
+    <!-- Section 1: What is a CBOM? -->
+    <section class="guide-section shell" id="what-is-cbom">
+      <div class="guide-head">
+        <span class="mod-num">FOUNDATION</span>
+        <h2>01 · What is a Cryptographic Bill of Materials (CBOM)?</h2>
+        <p class="guide-lede">
+          While a Software Bill of Materials (SBOM) details software libraries and package versions, a <strong>CBOM</strong> extends this visibility into the cryptographic posture of your systems—cataloging every mathematical primitive, key exchange, encryption algorithm, signature scheme, and key lifecycle.
+        </p>
+      </div>
+
+      <div class="guide-grid-3">
+        <div class="guide-card">
+          <div class="guide-card-icon">📐</div>
+          <h3>Algorithm Properties</h3>
+          <p>
+            Records the exact primitive type (signature, KEM, symmetric cipher, digest), algorithm name, mathematical parameters, OID, classical security strength in bits, and <strong>NIST Quantum Security Level</strong> (Level 0 for vulnerable algorithms; Levels 1–5 for post-quantum algorithms).
+          </p>
+          <div class="guide-card-tag">CYCLONEDX 1.6 CRYPTOPROPERTIES</div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-icon">📜</div>
+          <h3>Certificate & PKI Lineage</h3>
+          <p>
+            Catalogs X.509 certificate chains, subject names, issuing Certificate Authorities (CAs), signature algorithms (RSA-PSS vs ML-DSA), public key sizes, and validity expiration dates across public endpoints and internal mTLS meshes.
+          </p>
+          <div class="guide-card-tag">CERTIFICATEPROPERTIES</div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-icon">🌐</div>
+          <h3>Protocol & Ingress Cipher Suites</h3>
+          <p>
+            Discloses negotiated TLS versions (TLS 1.2 vs TLS 1.3), supported cipher suites, and key exchange algorithms (e.g. classical ECDH P-256 vs Hybrid X25519MLKEM768) protecting client-to-bank and inter-service channels.
+          </p>
+          <div class="guide-card-tag">PROTOCOLPROPERTIES</div>
+        </div>
+      </div>
+
+      <!-- SBOM vs CBOM Comparison Table -->
+      <div style="margin-top: 36px;">
+        <h3 style="font-size: 20px; letter-spacing: -.4px; margin-bottom: 12px;">Comparative Analysis: SBOM vs CBOM</h3>
+        <div class="compare-table-wrap">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th style="width:20%;">DIMENSION</th>
+                <th style="width:40%;">SOFTWARE BILL OF MATERIALS (SBOM)</th>
+                <th style="width:40%;">CRYPTOGRAPHIC BILL OF MATERIALS (CBOM)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Primary Scope</strong></td>
+                <td>Software packages, direct & transitive dependencies, licenses, supplier metadata.</td>
+                <td>Cryptographic algorithms, key lengths, certificates, cipher suites, protocol parameters, and KMS keys.</td>
+              </tr>
+              <tr>
+                <td><strong>Threat Model</strong></td>
+                <td>Known vulnerabilities (CVEs), supply chain poisoning, open-source license violations.</td>
+                <td>Quantum vulnerability (Shor's / Grover's), Harvest-Now-Decrypt-Later (HNDL), mathematical deprecation, key expiration.</td>
+              </tr>
+              <tr>
+                <td><strong>Governing Standard</strong></td>
+                <td>CycloneDX 1.4 / 1.5, SPDX 2.3.</td>
+                <td><strong>CycloneDX 1.6 Cryptographic Asset Extension</strong>, SPDX 3.0 Crypto Profile.</td>
+              </tr>
+              <tr>
+                <td><strong>Quantum Readiness</strong></td>
+                <td>Blind to cryptographic primitives (e.g. knows <code>openssl</code> is v3.0, but not if RSA-2048 or ML-KEM is used).</td>
+                <td>Explicitly classifies every asset according to <strong>NIST Quantum Security Levels (0 to 5)</strong> and migration status.</td>
+              </tr>
+              <tr>
+                <td><strong>Discovery Vectors</strong></td>
+                <td>Package manifest inspection (<code>package.json</code>, <code>pom.xml</code>, <code>Cargo.lock</code>).</td>
+                <td>Static AST code analysis, binary disassembly, TLS probing, eBPF network tracing, KMS key audits.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Why do we need a CBOM? -->
+    <section class="guide-section shell" id="why-cbom">
+      <div class="guide-head">
+        <span class="mod-num">BUSINESS & REGULATORY DRIVERS</span>
+        <h2>02 · Why is a CBOM Mandatory for Enterprise Banking?</h2>
+        <p class="guide-lede">
+          Transitioning to Post-Quantum Cryptography is impossible without comprehensive asset visibility. You cannot replace, wrap, or deprecate what you cannot discover.
+        </p>
+      </div>
+
+      <div class="guide-grid-2">
+        <div class="guide-card">
+          <div class="guide-card-icon">⚡</div>
+          <h3>1. Harvest-Now-Decrypt-Later (HNDL) Defense</h3>
+          <p>
+            Adversarial nation-states and criminal actors are actively intercepting and archiving encrypted financial transactions, account data, and inter-bank communications today. When cryptanalytically relevant quantum computers (CRQCs) arrive, stored RSA and ECC ciphertexts will be decrypted retrospectively. A CBOM pinpoints exactly which endpoints and data repositories are exposed to HNDL.
+          </p>
+          <div class="guide-card-tag">RISK CLASSIFICATION · P0 CRITICAL</div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-icon">⚖️</div>
+          <h3>2. Global Regulatory & Compliance Mandates</h3>
+          <p>
+            Financial regulators and governments have made cryptographic asset discovery mandatory:
+          </p>
+          <ul style="margin:8px 0 0; padding-left:20px; font-size:14px; color:#555a66; line-height:1.7;">
+            <li><strong>US OMB M-23-02 / NSM-10:</strong> Mandates federal agencies and financial contractors to prepare inventories of vulnerable cryptographic systems.</li>
+            <li><strong>EU DORA & NIS2:</strong> Demands digital operational resilience and cryptographic governance for banking entities.</li>
+            <li><strong>PCI-DSS v4.0 (Req 12.3.3):</strong> Requires an up-to-date inventory of all cryptographic architecture and hardware security modules (HSMs).</li>
+          </ul>
+          <div class="guide-card-tag">LEGAL COMPLIANCE & AUDIT</div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-icon">🎯</div>
+          <h3>3. Prioritized, Cost-Effective Migration Roadmap</h3>
+          <p>
+            A typical tier-1 bank runs thousands of microservices with scattered cryptographic calls. Attempting a blind "rip-and-replace" causes multi-million dollar outages. A CBOM provides an objective risk scoring matrix: distinguishing assets that must migrate immediately (TLS key exchange, digital signatures) from those that are quantum-safe and can remain untouched (AES-256-GCM, SHA-256).
+          </p>
+          <div class="guide-card-tag">CAPITAL EFFICIENCY · ZERO DOWNTIME</div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-icon">🚨</div>
+          <h3>4. Instant Blast-Radius & Incident Response</h3>
+          <p>
+            When an algorithm parameter is compromised, a zero-day flaw affects a cryptographic library, or an enterprise root CA certificate must be revoked, a CBOM allows security teams to query their entire infrastructure within seconds rather than initiating frantic, multi-week forensic code audits.
+          </p>
+          <div class="guide-card-tag">CRYPTO-AGILITY ENABLER</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: How does CBOM work? -->
+    <section class="guide-section shell" id="how-cbom-works">
+      <div class="guide-head">
+        <span class="mod-num">ENGINEERING ARCHITECTURE</span>
+        <h2>03 · How Does a CBOM Pipeline Work?</h2>
+        <p class="guide-lede">
+          Generating an accurate, production-grade CBOM requires combining multiple discovery vectors, normalizing cryptographic findings into standardized OIDs, and validating schema integrity.
+        </p>
+      </div>
+
+      <div class="guide-grid-4">
+        <div class="guide-card">
+          <div class="guide-card-icon">🔍</div>
+          <h3>1. SAST Code Scanning</h3>
+          <p>
+            Parses abstract syntax trees (ASTs) in source code to find direct cryptographic API invocations (SubtleCrypto, BouncyCastle, OpenSSL, pyca/cryptography).
+          </p>
+          <div class="guide-card-tag">SOURCE ANALYSIS</div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-icon">📦</div>
+          <h3>2. Binary Inspection</h3>
+          <p>
+            Scans compiled JARs, Go binaries, Docker images, and DLLs to detect statically linked crypto engines, hardcoded key lengths, and embedded X.509 certs.
+          </p>
+          <div class="guide-card-tag">ARTIFACT SCANNING</div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-icon">🌐</div>
+          <h3>3. Network & TLS Probing</h3>
+          <p>
+            Performs active handshake probing and eBPF kernel tracing across ingress proxies (Envoy, Nginx) to inspect negotiated cipher suites and certificates in transit.
+          </p>
+          <div class="guide-card-tag">RUNTIME DAST</div>
+        </div>
+
+        <div class="guide-card">
+          <div class="guide-card-icon">🔐</div>
+          <h3>4. HSM & KMS Harvesting</h3>
+          <p>
+            Audits Key Management Services (AWS KMS, Azure Key Vault, Cloud KMS) and PKCS#11 HSM slots to discover KEKs, key types, rotation cycles, and access policies.
+          </p>
+          <div class="guide-card-tag">KEY VAULT AUDITING</div>
+        </div>
+      </div>
+
+      <!-- Critical Zero-Knowledge Security Alert -->
+      <div class="alert-callout alert-danger">
+        <strong>CRITICAL ZERO-KNOWLEDGE RULE:</strong> A valid, compliant CBOM MUST NEVER store, serialize, or transmit private keys, secret key seeds, asymmetric <code>d</code> parameters, or symmetric keys. A CBOM catalogs only <em>cryptographic metadata</em> (algorithm types, public keys, OIDs, certificate chains, and key identifiers). Storing private keys in a CBOM creates an catastrophic security vulnerability.
+      </div>
+    </section>
+
+    <!-- Section 4: Step-by-Step Implementation Guide -->
+    <section class="guide-section shell" id="implementation-steps">
+      <div class="guide-head">
+        <span class="mod-num">IMPLEMENTATION PLAYBOOK</span>
+        <h2>04 · Step-by-Step CBOM Implementation Guide</h2>
+        <p class="guide-lede">
+          Follow this 5-stage blueprint to introduce automated cryptographic bill of materials generation into your enterprise banking software lifecycle.
+        </p>
+      </div>
+
+      <div class="step-flow">
+        <div class="step-item">
+          <div class="step-badge">01</div>
+          <div class="step-content">
+            <h3>Automated Discovery Across Repositories & Ingress</h3>
+            <p>
+              Integrate cryptographic scanners into your Git pipelines and Kubernetes clusters. Discover all source-code calls to asymmetric primitives (RSA, ECDSA, ECDH), symmetric ciphers (AES-GCM, ChaCha20), and hashing algorithms. Map external TLS listeners across all payment gateways.
+            </p>
+            <span class="step-meta">OUTPUT: Raw Cryptographic Asset Telemetry (JSON/CSV)</span>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-badge">02</div>
+          <div class="step-content">
+            <h3>Normalization & OID Categorization</h3>
+            <p>
+              Normalize proprietary algorithm strings into official ITU-T / ISO Object Identifiers (OIDs) and NIST classifications (e.g. map <code>RSA-PSS</code> to <code>1.2.840.113549.1.1.10</code>; map <code>ML-DSA-65</code> to <code>2.16.840.1.101.3.4.3.18</code>). Assign classical security bits and NIST Quantum Security Levels (0 through 5).
+            </p>
+            <span class="step-meta">OUTPUT: Canonical Cryptographic Asset Taxonomy</span>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-badge">03</div>
+          <div class="step-content">
+            <h3>CycloneDX 1.6 Schema Compilation</h3>
+            <p>
+              Format the inventory into the official <strong>CycloneDX 1.6 JSON</strong> schema. Structure assets under <code>components[]</code> with <code>type: "cryptographic-asset"</code> and nest detailed parameters inside the standardized <code>cryptoProperties</code> object.
+            </p>
+            <span class="step-meta">OUTPUT: Validated CycloneDX 1.6 CBOM Document</span>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-badge">04</div>
+          <div class="step-content">
+            <h3>Validation, Quantum Risk Triaging & Zero-Leak Audits</h3>
+            <p>
+              Run automated JSON-schema validation against the CycloneDX 1.6 specification. Execute strict regex linters to guarantee zero private keys or secret material exist in the document. Score quantum vulnerability according to data retention requirements.
+            </p>
+            <span class="step-meta">OUTPUT: Cryptographic Risk & Quantum Exposure Report</span>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-badge">05</div>
+          <div class="step-content">
+            <h3>CI/CD Pipeline Enforcement & Continuous Agility Monitoring</h3>
+            <p>
+              Incorporate CBOM generation into your daily CI/CD release gating (GitHub Actions, GitLab CI, ArgoCD). Block pull requests that attempt to commit deprecated classical algorithms (RSA-1024, SHA-1, 3DES) or unapproved key lengths.
+            </p>
+            <span class="step-meta">OUTPUT: Automated Cryptographic Governance Gate</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Interactive Dynamic CBOM Workbench -->
+    <section class="guide-section shell" id="workbench">
+      <div class="guide-head">
+        <span class="mod-num">INTERACTIVE TOOL</span>
+        <h2>05 · Dynamic CycloneDX 1.6 CBOM Generator & Explorer</h2>
+        <p class="guide-lede">
+          Generate, validate, and download live CycloneDX 1.6 Cryptographic Bills of Materials across three banking migration phases: Classical (AS-IS), Hybrid Transition, and Post-Quantum (TO-BE).
+        </p>
+      </div>
+
+      <div class="cbom-workbench">
+        <!-- Top Toolbar -->
+        <div class="cbom-top-bar">
+          <div>
+            <span class="preset-label">SELECT ARCHITECTURAL PROFILE:</span>
+            <div class="preset-toolbar" style="margin-bottom:0;">
+              <button class="preset-btn active" id="btnProfileClassical">Classical Banking (AS-IS)</button>
+              <button class="preset-btn" id="btnProfileHybrid">Hybrid In-Transit (Transition)</button>
+              <button class="preset-btn" id="btnProfilePqc">Post-Quantum (TO-BE Target)</button>
+            </div>
+          </div>
+
+          <div class="cbom-actions">
+            <button class="btn btn-dark" id="btnDownloadCbom">Download CycloneDX 1.6 JSON ⤓</button>
+            <button class="btn btn-outline" id="btnValidateCbom">Validate Schema Live ⚡</button>
+          </div>
+        </div>
+
+        <!-- KPI Strip -->
+        <div class="kpi-strip">
+          <div class="kpi-card">
+            <div class="kpi-val" id="kpiAssetCount">7</div>
+            <div class="kpi-lbl">TOTAL CRYPTO ASSETS</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-val" id="kpiQuantumRisk" style="color:var(--red);">LEVEL 0</div>
+            <div class="kpi-lbl">NIST QUANTUM LEVEL</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-val" id="kpiValidationStatus" style="color:var(--green);">VALID ✓</div>
+            <div class="kpi-lbl">CYCLONEDX 1.6 SCHEMA</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-val" id="kpiZeroLeaks" style="color:var(--blue);">0 LEAKS</div>
+            <div class="kpi-lbl">ZERO PRIVATE KEYS DETECTED</div>
+          </div>
+        </div>
+
+        <!-- Dynamic Asset Inventory Table -->
+        <div style="margin-bottom: 24px;">
+          <h3 style="font-size: 18px; letter-spacing: -.3px; margin-bottom: 12px;" id="inventoryTableHeading">
+            Cryptographic Inventory: Classical Banking Architecture (Legacy AS-IS)
+          </h3>
+          <div class="table-responsive">
+            <table class="cbom-table">
+              <thead>
+                <tr>
+                  <th style="width:18%;">ALGORITHM / ASSET</th>
+                  <th style="width:12%;">PRIMITIVE</th>
+                  <th style="width:12%;">CLASSICAL</th>
+                  <th style="width:14%;">NIST QUANTUM</th>
+                  <th style="width:24%;">BANKING USAGE & COMPONENT</th>
+                  <th style="width:20%;">MIGRATION STATUS</th>
+                </tr>
+              </thead>
+              <tbody id="cbomAssetTableBody">
+                <!-- Dynamically populated by cbom-page.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Live CycloneDX 1.6 JSON Viewer -->
+        <div class="json-viewer-wrap">
+          <div class="json-header">
+            <span>CYCLONEDX 1.6 CBOM SPECIFICATION (VALIDATED JSON)</span>
+            <button class="btn-copy" id="btnCopyCbomJson" style="color:#fff; border-color:#444;">Copy JSON ▢</button>
+          </div>
+          <pre class="json-code-box" id="cbomJsonDisplay">Loading CycloneDX 1.6 CBOM document...</pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">C<span>.</span></span>
+      <span>CRYPTOSHIFT <small>PQC CODE MIGRATION LAB</small></span>
+    </a>
+    <span>Educational demo · Static website · CycloneDX 1.6 CBOM & NIST Standards</span>
+    <a href="#main">Back to top ↑</a>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/cbom-generator.js"></script>
+  <script src="js/cbom-page.js"></script>
+</body>
+</html>

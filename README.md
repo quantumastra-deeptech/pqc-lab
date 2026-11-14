@@ -19,6 +19,12 @@ An interactive, dual-card developer lab demonstrating how classical cryptography
   5. **Database Envelope Migration**: `Classical KEK Wrapping` $\rightarrow$ `ML-KEM DEK Rewrapping (Zero Bulk Re-encryption)`
 - **The 4 Migration Rules Cheat Sheet**:
   - Quick reference explaining asymmetric replacement vs symmetric retention.
+- **Dedicated CBOM (Cryptographic Bill of Materials) Guide & Generator (`cbom.html`)**:
+  - What is a CBOM, Why it is needed (US OMB M-23-02, NIS2, DORA, PCI-DSS 4.0), How discovery works (SAST, DAST, KMS audits), and a 5-step implementation playbook.
+  - Interactive CycloneDX 1.6 generator with live schema validation, zero-leak checks, and JSON export.
+- **Dedicated Cryptographic Agility Guide & Architectural Seam (`crypto-agility.html`)**:
+  - Architectural decoupling, the "One-and-Done" fallacy, the 5 core pillars of agility, and zero bulk-data re-encryption using Envelope Encryption.
+  - Live interactive architectural seam running ISO 20022 payments across Classical, Hybrid, and PQC providers without changing a single line of business logic.
 
 ---
 
