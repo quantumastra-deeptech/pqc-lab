@@ -572,60 +572,11 @@ button {
   padding-top: 10px;
 }
 
-/* --------------------------------------------------------------------------
-   Automated Verification Test Runner
-   -------------------------------------------------------------------------- */
-.test-panel {
-  border: 1px solid var(--line);
-  background: #fff;
-  border-radius: 4px;
-  padding: 26px;
-}
-.test-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 18px;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
 .impact-badge {
   font: 700 11px var(--mono);
   padding: 5px 10px;
   border-radius: 3px;
 }
-
-.table-responsive {
-  overflow-x: auto;
-  border: 1px solid var(--line);
-  border-radius: 4px;
-}
-.test-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-  text-align: left;
-}
-.test-table th {
-  background: var(--soft);
-  padding: 12px 14px;
-  font: 700 11px var(--mono);
-  color: var(--muted);
-  border-bottom: 1px solid var(--line);
-}
-.test-table td {
-  padding: 11px 14px;
-  border-bottom: 1px solid #f2f4f7;
-  line-height: 1.5;
-}
-.test-status-pill {
-  font: 700 10.5px var(--mono);
-  padding: 3px 8px;
-  border-radius: 2px;
-}
-.pill-pass { background: rgba(75, 183, 122, 0.18); color: #1e7e48; }
-.pill-fail { background: rgba(240, 91, 80, 0.18); color: var(--red); }
 
 /* --------------------------------------------------------------------------
    Footer

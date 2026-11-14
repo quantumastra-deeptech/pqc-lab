@@ -19,17 +19,12 @@ An interactive, dual-card developer lab demonstrating how classical cryptography
   5. **Database Envelope Migration**: `Classical KEK Wrapping` $\rightarrow$ `ML-KEM DEK Rewrapping (Zero Bulk Re-encryption)`
 - **The 4 Migration Rules Cheat Sheet**:
   - Quick reference explaining asymmetric replacement vs symmetric retention.
-- **Automated Verification Test Suite**:
-  - 12 real unit tests runnable directly in the browser and via Node CLI (`npm test`).
 
 ---
 
-## Local Development & Testing
+## Local Development
 
 ```bash
-# Run automated test suite
-npm test
-
 # Run locally in browser
 python -m http.server 8000
 # or

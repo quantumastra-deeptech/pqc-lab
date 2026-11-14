@@ -23,7 +23,6 @@
     <nav class="topnav" aria-label="Main navigation">
       <a href="#lab">Interactive Lab</a>
       <a href="#cheat-sheet">Migration Cheat Sheet</a>
-      <a href="#tests">Automated Tests</a>
       <a href="https://github.com/quantumastra-deeptech/pqc-lab" target="_blank" rel="noopener">GitHub ↗</a>
     </nav>
     <a class="top-cta" href="#lab">Open Interactive Lab <span>↓</span></a>
@@ -200,46 +199,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Automated Verification Test Runner -->
-    <section class="section shell" id="tests">
-      <div class="section-head">
-        <div>
-          <span class="mod-num">TEST RUNNER</span>
-          <h2>Live Cryptographic Test Suite.<br><span class="muted">Run all 12 assertions live in your browser.</span></h2>
-        </div>
-        <p class="section-intro">Verifies real signing, verification, encapsulation, decryption, corruption rejection, and zero private key leaks.</p>
-      </div>
-
-      <div class="test-panel">
-        <div class="test-top">
-          <div id="testSuiteSummary">
-            <span class="impact-badge badge-blue">12 TESTS READY TO EXECUTE</span>
-          </div>
-          <button class="btn btn-dark" id="btnRunTestSuite">Run Cryptographic Test Suite ▶</button>
-        </div>
-
-        <div class="table-responsive">
-          <table class="test-table">
-            <thead>
-              <tr>
-                <th style="width:50px;">#</th>
-                <th>TEST ASSERTION</th>
-                <th style="width:100px;">STATUS</th>
-                <th>RESULT / DURATION</th>
-              </tr>
-            </thead>
-            <tbody id="testTableBody">
-              <tr>
-                <td colspan="4" style="text-align:center; padding:24px; color:var(--muted); font:12px var(--mono);">
-                  Click "Run Cryptographic Test Suite" to execute all tests in browser.
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
   </main>
 
   <!-- Footer -->
@@ -257,7 +216,6 @@
   <script src="js/crypto-core.js"></script>
   <script src="js/providers.js"></script>
   <script src="js/cbom-generator.js"></script>
-  <script src="js/test-suite.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

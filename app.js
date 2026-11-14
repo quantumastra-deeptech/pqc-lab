@@ -641,37 +641,6 @@ record.wrappedDek = await aesKeyWrap(await hkdf(sharedSecret), dek);
     setTimeout(() => { $('#btnCopyPqcCode').textContent = 'Copy Code ▢'; }, 1500);
   });
 
-  // 7. Automated Test Suite Runner (1-Click Verification)
-  $('#btnRunTestSuite')?.addEventListener('click', async () => {
-    if (typeof TestSuite === 'undefined') return;
-    const btn = $('#btnRunTestSuite');
-    btn.disabled = true;
-    btn.textContent = 'Running 12 automated tests...';
-
-    const tableBody = $('#testTableBody');
-    tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:18px;">Executing cryptographic tests...</td></tr>';
-
-    const report = await TestSuite.runAllTests();
-
-    tableBody.innerHTML = report.results.map((r, i) => `
-      <tr>
-        <td style="font:11px var(--mono); color:var(--muted);">${String(i + 1).padStart(2, '0')}</td>
-        <td><strong>${r.name}</strong></td>
-        <td><span class="test-status-pill ${r.passed ? 'pill-pass' : 'pill-fail'}">${r.passed ? 'PASS' : 'FAIL'}</span></td>
-        <td style="font:12px var(--mono); color:${r.passed ? '#1e7e48' : 'var(--red)'};">${r.passed ? r.message : r.error} (${r.durationMs.toFixed(1)} ms)</td>
-      </tr>
-    `).join('');
-
-    $('#testSuiteSummary').innerHTML = `
-      <span class="impact-badge ${report.allPassed ? 'badge-green' : 'badge-red'}" style="font-size:12px; padding:6px 12px;">
-        ${report.passedCount}/${report.totalTests} TESTS PASSED in ${report.totalDurationMs.toFixed(1)} ms
-      </span>
-    `;
-
-    btn.disabled = false;
-    btn.textContent = 'Re-Run Test Suite ↻';
-  });
-
   // Initial Load
   loadDemo('signature');
 
